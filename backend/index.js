@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const Groq = require("groq-sdk/index.mjs");
+const Groq = require("groq-sdk");
 
 const app = express();
 app.use(cors());
