@@ -24,7 +24,7 @@ const [complexity, setComplexity] = useState("");
     const detected = estimateComplexity(code);
 setComplexity(detected);
 
-    const res = await fetch(" https://code-reviewer-gus0.onrender.com/review", {
+    const res = await fetch(" https://code-reviewer-ia1w.onrender.com/review", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
