@@ -1,0 +1,117 @@
+.dashboard-layout{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:250px;
+  background:#1e293b;
+  padding:30px;
+}
+
+.sidebar h2{
+  margin-bottom:30px;
+}
+
+.sidebar nav{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.sidebar nav a{
+  padding:12px;
+  border-radius:8px;
+  transition:.3s;
+}
+
+.sidebar nav a:hover{
+  background:#6c63ff;
+}
+
+.dashboard-main{
+  flex:1;
+  padding:30px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:30px;
+}
+
+.topbar button{
+  background:#ef4444;
+  color:white;
+  padding:10px 20px;
+  border-radius:8px;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.stat-card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:15px;
+}
+
+.recent-activity{
+  margin-top:40px;
+}
+
+.activity-card{
+  background:#1e293b;
+  padding:20px;
+  margin-top:15px;
+  border-radius:10px;
+}
+
+.tool-page{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.tool-page textarea,
+.tool-page input{
+  padding:15px;
+  border:none;
+  border-radius:10px;
+}
+
+.tool-page button{
+  background:#6c63ff;
+  color:white;
+  padding:15px;
+  border-radius:10px;
+}
+
+.output-box{
+  background:#1e293b;
+  padding:20px;
+  border-radius:10px;
+}
+
+.compare-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.history-card,
+.snippet-card,
+.billing-card,
+.profile-card,
+.settings-card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:10px;
+}
+
+.profile-card img{
+  border-radius:50%;
+}

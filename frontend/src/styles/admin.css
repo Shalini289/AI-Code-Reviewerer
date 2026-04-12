@@ -1,0 +1,77 @@
+.admin-layout{
+  display:flex;
+  min-height:100vh;
+}
+
+.admin-sidebar{
+  width:250px;
+  background:#111827;
+  padding:30px;
+}
+
+.admin-sidebar nav{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  margin-top:20px;
+}
+
+.admin-sidebar nav a{
+  padding:12px;
+  border-radius:8px;
+}
+
+.admin-sidebar nav a:hover{
+  background:#6c63ff;
+}
+
+.admin-main{
+  flex:1;
+  padding:30px;
+}
+
+.admin-topbar{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:30px;
+}
+
+.admin-topbar button{
+  background:#ef4444;
+  padding:10px 20px;
+  color:white;
+  border-radius:8px;
+}
+
+.admin-stats-grid,
+.analytics-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.admin-stat-card,
+.analytics-card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:15px;
+}
+
+.admin-table{
+  width:100%;
+  margin-top:20px;
+  border-collapse:collapse;
+}
+
+.admin-table th,
+.admin-table td{
+  padding:15px;
+  border:1px solid #334155;
+}
+
+.review-card{
+  background:#1e293b;
+  padding:20px;
+  margin-top:20px;
+  border-radius:10px;
+}
