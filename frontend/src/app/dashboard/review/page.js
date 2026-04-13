@@ -3,7 +3,7 @@
 import { useState } from "react";
 import "@/styles/dashboard.css";
 import { reviewCode } from "@/services/reviewService";
-import ReviewResult from"@/components/review/ReviewResult"
+import ReviewResult from"@/components/ReviewResult"
 export default function ReviewPage() {
   const [code, setCode] =
     useState("");
