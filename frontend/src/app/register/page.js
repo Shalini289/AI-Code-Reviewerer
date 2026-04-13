@@ -37,6 +37,9 @@ export default function Register() {
 
     setError("");
 
+    const regex = /^[A-Za-z ]+$/;
+
+ 
     if (
       !form.name ||
       !form.email ||
@@ -46,7 +49,25 @@ export default function Register() {
         "Please fill all fields"
       );
     }
+ if (!regex.test(form.name)) {
+    return setError(
+        "Enter valid full name"
+      );
+  }
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(form.email)) {
+  return setError(
+        "Enter valid email"
+      );
+}
+const passwordRegex =
+/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+if (!passwordRegex.test(form.password)) {
 
+  return setError(
+        "Password must contain uppercase, lowercase, number, special character and be 8+ characters"
+      );
+}
     if (
       form.password !==
       form.confirmPassword
