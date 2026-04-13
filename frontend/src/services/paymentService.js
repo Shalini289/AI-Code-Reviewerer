@@ -1,14 +1,12 @@
 import api from "@/utils/api";
 
-export const subscribePlan = async (plan) => {
-  const res = await api.post("/payment/subscribe", {
-    plan,
-  });
+export const upgradePlan =
+  async (plan) => {
+    const res =
+      await api.put(
+        "/payment/upgrade",
+        { plan }
+      );
 
-  return res.data;
-};
-
-export const getBillingHistory = async () => {
-  const res = await api.get("/payment/history");
-  return res.data;
-};
+    return res.data;
+  };

@@ -1,14 +1,34 @@
 const express = require("express");
 
-const auth =
+const router = express.Router();
+
+const authMiddleware =
   require("../middleware/authMiddleware");
 
 const {
   reviewCode,
-} = require("../controllers/reviewController");
+  getReviewHistory,
+  deleteReview,
+} = require(
+  "../controllers/reviewController"
+);
 
-const router = express.Router();
+router.post(
+  "/code",
+  authMiddleware,
+  reviewCode
+);
 
-router.post("/code", auth, reviewCode);
+router.get(
+  "/history",
+  authMiddleware,
+  getReviewHistory
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteReview
+);
 
 module.exports = router;

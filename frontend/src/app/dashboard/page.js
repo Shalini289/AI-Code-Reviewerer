@@ -1,45 +1,111 @@
+"use client";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getDashboardData,
+} from "@/services/dashboardService";
+
 import "@/styles/dashboard.css";
 
-export default function Dashboard() {
+export default function DashboardPage() {
+  const [data, setData] =
+    useState(null);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard =
+    async () => {
+      try {
+        const res =
+          await getDashboardData();
+
+        setData(res);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  if (!data)
+    return (
+      <p>
+        Loading...
+      </p>
+    );
+
   return (
-    <div className="dashboard-home">
-      <section className="stats-grid">
+    <div className="dashboard-page">
+      <h1>
+        Welcome Back,{" "}
+        {
+          data.user
+            .name
+        }
+      </h1>
+
+      <div className="stats-grid">
+
         <div className="stat-card">
-          <h3>Total Reviews</h3>
-          <p>152</p>
+          <h3>
+            Total Reviews
+          </h3>
+          <p>
+            {
+              data.totalReviews
+            }
+          </p>
         </div>
 
         <div className="stat-card">
-          <h3>Saved Snippets</h3>
-          <p>47</p>
+          <h3>
+            This Month
+          </h3>
+          <p>
+            {
+              data.monthlyReviews
+            }
+          </p>
         </div>
 
-        <div className="stat-card">
-          <h3>Security Issues Found</h3>
-          <p>23</p>
-        </div>
+      </div>
 
-        <div className="stat-card">
-          <h3>Current Plan</h3>
-          <p>Pro</p>
-        </div>
-      </section>
+      <div className="recent-section">
+        <h2>
+          Recent Reviews
+        </h2>
 
-      <section className="recent-activity">
-        <h2>Recent Activity</h2>
-        <div className="activity-card">
-          <p>Reviewed JavaScript Authentication Code</p>
-          <span>2 hours ago</span>
-        </div>
-        <div className="activity-card">
-          <p>Analyzed Python Sorting Algorithm</p>
-          <span>5 hours ago</span>
-        </div>
-        <div className="activity-card">
-          <p>Security Scan Completed on Login API</p>
-          <span>Yesterday</span>
-        </div>
-      </section>
+        {data.recentReviews.map(
+          (review) => (
+            <div
+              key={
+                review._id
+              }
+              className="review-item"
+            >
+              <h4>
+                {
+                  review.language
+                }
+              </h4>
+
+              <p>
+                {review.code.slice(
+                  0,
+                  80
+                )}
+                ...
+              </p>
+            </div>
+          )
+        )}
+      </div>
+
     </div>
   );
 }

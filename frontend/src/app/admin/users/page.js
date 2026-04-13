@@ -1,35 +1,112 @@
-import "@/styles/admin.css";
+"use client";
 
-export default function Users() {
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getUsers,
+  deleteUser,
+} from "@/services/adminService";
+
+export default function UsersPage() {
+  const [users, setUsers] =
+    useState([]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers =
+    async () => {
+      try {
+        const data =
+          await getUsers();
+
+        setUsers(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  const handleDelete =
+    async (id) => {
+      try {
+        await deleteUser(id);
+
+        fetchUsers();
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
   return (
-    <div className="admin-page">
-      <h1>User Management</h1>
+    <div>
+      <h1>
+        Manage Users
+      </h1>
 
       <table className="admin-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Role</th>
             <th>Plan</th>
-            <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
+
         <tbody>
-          <tr>
-            <td>Shalini</td>
-            <td>shalini@example.com</td>
-            <td>Pro</td>
-            <td>Active</td>
-            <td><button>Ban</button></td>
-          </tr>
-          <tr>
-            <td>Rahul</td>
-            <td>rahul@example.com</td>
-            <td>Free</td>
-            <td>Active</td>
-            <td><button>Ban</button></td>
-          </tr>
+          {users.map(
+            (user) => (
+              <tr
+                key={
+                  user._id
+                }
+              >
+                <td>
+                  {
+                    user.name
+                  }
+                </td>
+
+                <td>
+                  {
+                    user.email
+                  }
+                </td>
+
+                <td>
+                  {
+                    user.role
+                  }
+                </td>
+
+                <td>
+                  {
+                    user.plan
+                  }
+                </td>
+
+                <td>
+                  <button
+                    className="admin-btn delete-btn"
+                    onClick={() =>
+                      handleDelete(
+                        user._id
+                      )
+                    }
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            )
+          )}
         </tbody>
       </table>
     </div>

@@ -1,9 +1,15 @@
 import Link from "next/link";
 import "@/styles/landing.css";
-
+import Navbar from "@/components/common/Navbar";
 export default function Home() {
   return (
+    <>
+    
+  <Navbar />
+
+
     <main className="home">
+      
       <section className="hero">
         <div className="hero-content">
           <h1>AI Powered Code Reviewer</h1>
@@ -21,12 +27,13 @@ export default function Home() {
       <section className="features">
         <h2>Why Choose Us?</h2>
         <div className="feature-grid">
-          <div className="card">⚡ Instant Code Review</div>
-          <div className="card">🔒 Security Detection</div>
-          <div className="card">📈 Complexity Analysis</div>
-          <div className="card">🤖 AI Suggestions</div>
+          <div className="card">Instant Code Review</div>
+          <div className="card">Security Detection</div>
+          <div className="card">Complexity Analysis</div>
+          <div className="card">AI Suggestions</div>
         </div>
       </section>
     </main>
+    </>
   );
 }

@@ -1,39 +1,39 @@
-import ProtectedRoute from "@/components/ProtectedRoute";
 import Link from "next/link";
+
 import "@/styles/admin.css";
 
 export default function AdminLayout({
   children,
 }) {
   return (
-    <ProtectedRoute adminOnly={true}>
-      <div className="admin-layout">
-        <aside className="admin-sidebar">
-          <h2>Admin Panel</h2>
+    <div className="admin-layout">
 
-          <nav>
-            <Link href="/admin">
-              Dashboard
-            </Link>
+      <aside className="admin-sidebar">
+        <h2>
+          Admin Panel
+        </h2>
 
-            <Link href="/admin/users">
-              Users
-            </Link>
+        <Link href="/admin">
+          Dashboard
+        </Link>
 
-            <Link href="/admin/reviews">
-              Reviews
-            </Link>
+        <Link href="/admin/users">
+          Users
+        </Link>
 
-            <Link href="/admin/analytics">
-              Analytics
-            </Link>
-          </nav>
-        </aside>
+        <Link href="/admin/reviews">
+          Reviews
+        </Link>
 
-        <main className="admin-main">
-          {children}
-        </main>
-      </div>
-    </ProtectedRoute>
+        <Link href="/admin/analytics">
+          Analytics
+        </Link>
+      </aside>
+
+      <main className="admin-main">
+        {children}
+      </main>
+
+    </div>
   );
 }

@@ -1,21 +1,112 @@
-import "@/styles/admin.css";
+"use client";
 
-export default function Reviews() {
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getReviews,
+  deleteReview,
+} from "@/services/adminService";
+
+export default function ReviewsPage() {
+  const [reviews, setReviews] =
+    useState([]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews =
+    async () => {
+      try {
+        const data =
+          await getReviews();
+
+        setReviews(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  const handleDelete =
+    async (id) => {
+      try {
+        await deleteReview(id);
+
+        fetchReviews();
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
   return (
-    <div className="admin-page">
-      <h1>Review Management</h1>
+    <div>
+      <h1>
+        Manage Reviews
+      </h1>
 
-      <div className="review-card">
-        <h3>JavaScript Auth Review</h3>
-        <p>Submitted by Shalini</p>
-        <button>Delete</button>
-      </div>
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Code</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-      <div className="review-card">
-        <h3>Python Sorting Review</h3>
-        <p>Submitted by Rahul</p>
-        <button>Delete</button>
-      </div>
+        <tbody>
+          {reviews.map(
+            (review) => (
+              <tr
+                key={
+                  review._id
+                }
+              >
+                <td>
+                  {
+                    review
+                      .user
+                      ?.name
+                  }
+                </td>
+
+
+                <td>
+                  {review.code.slice(
+                    0,
+                    40
+                  )}
+                  ...
+                </td>
+
+                <td>
+                  {new Date(
+                    review.createdAt
+                  ).toLocaleDateString()}
+                </td>
+
+                <td>
+                  <button
+                    className="admin-btn delete-btn"
+                    onClick={() =>
+                      handleDelete(
+                        review._id
+                      )
+                    }
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

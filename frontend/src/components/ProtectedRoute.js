@@ -1,53 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/context/AuthContext";
+import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  useEffect,
+} from "react";
 
 export default function ProtectedRoute({
   children,
-  adminOnly = false,
 }) {
-  const router = useRouter();
-
-  const {
-    user,
-    loading,
-    isAuthenticated,
-  } = useAuthContext();
+  const router =
+    useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (!isAuthenticated) {
-        router.push("/login");
-      }
+    const token =
+      localStorage.getItem(
+        "token"
+      );
 
-      if (
-        adminOnly &&
-        user?.role !== "admin"
-      ) {
-        router.push("/dashboard");
-      }
+    if (!token) {
+      router.push(
+        "/login"
+      );
     }
-  }, [
-    user,
-    loading,
-    isAuthenticated,
-    adminOnly,
-    router,
-  ]);
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (adminOnly && user?.role !== "admin") {
-    return null;
-  }
+  }, []);
 
   return children;
 }

@@ -1,36 +1,104 @@
-import "@/styles/admin.css";
+"use client";
 
-export default function Admin() {
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getAdminStats,
+} from "@/services/adminService";
+
+export default function AdminPage() {
+  const [stats, setStats] =
+    useState(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats =
+    async () => {
+      try {
+        const data =
+          await getAdminStats();
+
+        setStats(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  if (!stats)
+    return (
+      <p>
+        Loading...
+      </p>
+    );
+
   return (
-    <div className="admin-dashboard">
-      <section className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <h3>Total Users</h3>
-          <p>1,245</p>
+    <div>
+      <h1>
+        Admin Dashboard
+      </h1>
+
+      <div className="admin-stats">
+
+        <div className="admin-card">
+          <h3>
+            Total Users
+          </h3>
+
+          <p>
+            {
+              stats.totalUsers
+            }
+          </p>
         </div>
 
-        <div className="admin-stat-card">
-          <h3>Total Reviews</h3>
-          <p>8,942</p>
+        <div className="admin-card">
+          <h3>
+            Total Reviews
+          </h3>
+
+          <p>
+            {
+              stats.totalReviews
+            }
+          </p>
         </div>
 
-        <div className="admin-stat-card">
-          <h3>Revenue</h3>
-          <p>$12,430</p>
-        </div>
+      </div>
 
-        <div className="admin-stat-card">
-          <h3>Active Subscriptions</h3>
-          <p>427</p>
-        </div>
-      </section>
+      <div className="recent-users">
+        <h2>
+          Recent Users
+        </h2>
 
-      <section className="admin-recent-box">
-        <h2>Recent Platform Activity</h2>
-        <div className="activity-item">New User Registered - 5 mins ago</div>
-        <div className="activity-item">Subscription Purchased - 12 mins ago</div>
-        <div className="activity-item">Review Submitted - 20 mins ago</div>
-      </section>
+        {stats.recentUsers.map(
+          (user) => (
+            <div
+              key={
+                user._id
+              }
+              className="recent-user-card"
+            >
+              <p>
+                {
+                  user.name
+                }
+              </p>
+
+              <span>
+                {
+                  user.email
+                }
+              </span>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 }

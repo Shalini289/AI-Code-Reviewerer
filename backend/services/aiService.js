@@ -1,23 +1,70 @@
-const Review = require("../models/Review");
-const reviewWithAI = require("../services/aiService");
+const axios = require("axios");
 
-exports.reviewCode = async (req, res) => {
+const reviewWithAI = async (
+  code,
+  language
+) => {
   try {
-    const { code } = req.body;
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
 
-    const aiResult = await reviewWithAI(code);
+        messages: [
+          {
+            role: "system",
+            content: `
+You are an expert software engineer.
 
-    const review = await Review.create({
-      user: req.user.id,
-      code,
-      result: aiResult,
-    });
+Analyze the given code and ONLY return valid JSON in this exact format:
 
-    res.json(review);
+{
+  "bugs": ["bug1", "bug2"],
+  "optimizations": ["opt1", "opt2"],
+  "security": ["security1"],
+  "bestPractices": ["practice1"],
+  "complexity": {
+      "time": "O(n)",
+      "space": "O(1)"
+  }
+}
 
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+DO NOT RETURN ANY EXTRA TEXT.
+`,
+          },
+
+          {
+            role: "user",
+            content: `
+Language: ${language}
+
+Code:
+${code}
+`,
+          },
+        ],
+      },
+
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return JSON.parse(
+      response.data.choices[0]
+        .message.content
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(
+      "AI Review Failed"
+    );
   }
 };
+
+module.exports = reviewWithAI;
