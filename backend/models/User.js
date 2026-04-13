@@ -55,6 +55,8 @@ const userSchema =
       lastLogin: {
         type: Date,
       },
+      resetPasswordToken: String,
+resetPasswordExpire: Date,
     },
     {
       timestamps: true,

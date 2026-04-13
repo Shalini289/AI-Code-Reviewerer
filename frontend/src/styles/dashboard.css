@@ -473,3 +473,219 @@
   padding: 25px;
   border-radius: 15px;
 }
+.compare-result {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+}
+
+.result-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.result-card h3 {
+  color: #6c63ff;
+  margin-bottom: 10px;
+}
+
+.result-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.result-card ul {
+  padding-left: 20px;
+}
+
+.result-card li {
+  margin-bottom: 8px;
+  color: #cbd5e1;
+}
+
+.winner {
+  border-left: 5px solid #10b981;
+}
+/* GITHUB REVIEW */
+.github-page {
+  padding: 30px;
+}
+
+.github-page input {
+  width: 100%;
+  padding: 15px;
+  margin: 20px 0;
+  border: none;
+  border-radius: 12px;
+  background: #1e293b;
+  color: white;
+}
+
+.github-page button {
+  padding: 14px 25px;
+  background: #6c63ff;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.github-result {
+  margin-top: 30px;
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 15px;
+}
+
+.github-result {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+}
+
+.result-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.result-card h3 {
+  color: #6c63ff;
+  margin-bottom: 10px;
+}
+
+.result-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.result-card ul {
+  padding-left: 20px;
+}
+
+.result-card li {
+  margin-bottom: 10px;
+}
+/* PROFILE PAGE */
+.profile-page {
+  padding: 30px;
+}
+
+.profile-card {
+  background: #1e293b;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 500px;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 90px;
+  height: 90px;
+  background: #6c63ff;
+  border-radius: 50%;
+  margin: auto;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.profile-card h2 {
+  margin-bottom: 10px;
+}
+
+.profile-card p {
+  color: #94a3b8;
+}
+
+.profile-info {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.profile-info div {
+  margin-bottom: 12px;
+  background: #334155;
+  padding: 12px;
+  border-radius: 10px;
+}
+/* SECURITY PAGE */
+.security-page {
+  padding: 30px;
+}
+
+.security-page textarea,
+.security-page select {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  background: #1e293b;
+  border: none;
+  border-radius: 12px;
+  color: white;
+}
+
+.security-page button {
+  padding: 14px 25px;
+  background: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 10px;
+}
+
+.security-result {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+}
+
+.danger {
+  border-left: 5px solid red;
+}
+/* SNIPPETS */
+.snippets-page {
+  padding: 30px;
+}
+
+.snippets-page input,
+.snippets-page textarea,
+.snippets-page select {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #1e293b;
+  border: none;
+  color: white;
+  border-radius: 12px;
+}
+
+.snippets-page button {
+  padding: 14px 25px;
+  background: #6c63ff;
+  border: none;
+  color: white;
+  border-radius: 10px;
+}
+
+.snippet-list {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+}
+
+.snippet-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.snippet-card pre {
+  background: #0f172a;
+  padding: 15px;
+  border-radius: 10px;
+  overflow-x: auto;
+}

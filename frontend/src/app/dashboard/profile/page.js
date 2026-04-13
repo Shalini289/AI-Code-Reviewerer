@@ -1,20 +1,108 @@
+"use client";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getProfile,
+} from "@/services/profileService";
+
 import "@/styles/dashboard.css";
 
-export default function Profile() {
+export default function ProfilePage() {
+  const [profile, setProfile] =
+    useState(null);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile =
+    async () => {
+      try {
+        const data =
+          await getProfile();
+
+        setProfile(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+  if (!profile)
+    return (
+      <p>
+        Loading...
+      </p>
+    );
+
   return (
-    <div className="tool-page">
-      <h1>User Profile</h1>
+    <div className="profile-page">
+      <h1>
+        My Profile
+      </h1>
 
       <div className="profile-card">
-        <img src="https://via.placeholder.com/100" alt="avatar" />
-        <h2>Shalini Bhadouriya</h2>
-        <p>Full Stack Developer</p>
-      </div>
 
-      <div className="profile-info">
-        <p>Email: shalini@example.com</p>
-        <p>Joined: Jan 2026</p>
-        <p>Reviews Completed: 152</p>
+        <div className="profile-avatar">
+          {profile.name
+            ?.charAt(0)
+            .toUpperCase()}
+        </div>
+
+        <h2>
+          {
+            profile.name
+          }
+        </h2>
+
+        <p>
+          {
+            profile.email
+          }
+        </p>
+
+        <div className="profile-info">
+          <div>
+            <strong>
+              Role:
+            </strong>{" "}
+            {
+              profile.role
+            }
+          </div>
+
+          <div>
+            <strong>
+              Plan:
+            </strong>{" "}
+            {
+              profile.plan
+            }
+          </div>
+
+          <div>
+            <strong>
+              Total Reviews:
+            </strong>{" "}
+            {
+              profile.totalReviews
+            }
+          </div>
+
+          <div>
+            <strong>
+              Joined:
+            </strong>{" "}
+            {new Date(
+              profile.createdAt
+            ).toLocaleDateString()}
+          </div>
+        </div>
+
       </div>
     </div>
   );

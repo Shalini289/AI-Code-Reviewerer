@@ -44,14 +44,26 @@ export default function DashboardLayout({
             <Link href="/dashboard/review">
               Review
             </Link>
+            <Link href="/dashboard/github-review">
+  GitHub Review
+</Link>
 <Link href="/dashboard/compare">
   Compare
 </Link>
             <Link href="/dashboard/history">
               History
             </Link>
+            <Link href="/dashboard/security">
+  Security
+</Link>
+<Link href="/dashboard/snippets">
+  Snippets
+</Link>
 <Link href="/dashboard/billing">
   Billing
+</Link>
+<Link href="/dashboard/profile">
+  Profile
 </Link>
             <Link href="/dashboard/settings">
               Settings

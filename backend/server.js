@@ -31,9 +31,23 @@ const compareRoutes =
     "./routes/compareRoutes"
   );
 
+const githubRoutes =
+  require(
+    "./routes/githubRoutes"
+  );
 
-
-
+const profileRoutes =
+  require(
+    "./routes/profileRoutes"
+  );
+const securityRoutes =
+  require(
+    "./routes/securityRoutes"
+  );
+const snippetRoutes =
+  require(
+    "./routes/snippetRoutes"
+  );
 
 
 
@@ -76,6 +90,26 @@ app.use(
   "/api/compare",
   compareRoutes
 );
+
+app.use(
+  "/api/github",
+  githubRoutes
+);
+
+app.use(
+  "/api/profile",
+  profileRoutes
+);
+
+app.use(
+  "/api/security",
+  securityRoutes
+);
+app.use(
+  "/api/snippets",
+  snippetRoutes
+);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

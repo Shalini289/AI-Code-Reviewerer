@@ -4,24 +4,32 @@ import {
   useState,
 } from "react";
 
+import {
+  useParams,
+} from "next/navigation";
+
 import api from "@/utils/api";
 
-import "@/styles/auth.css";
+export default function ResetPassword() {
+  const { token } =
+    useParams();
 
-export default function ForgotPassword() {
-  const [email, setEmail] =
+  const [password,
+    setPassword] =
     useState("");
 
-  const handleSubmit =
+  const handleReset =
     async () => {
       try {
-        await api.post(
-          "/auth/forgot-password",
-          { email }
+        await api.put(
+          `/auth/reset-password/${token}`,
+          {
+            password,
+          }
         );
 
         alert(
-          "Reset email sent!"
+          "Password Reset Successful"
         );
 
       } catch (err) {
@@ -33,15 +41,17 @@ export default function ForgotPassword() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>
-          Forgot Password
+          Reset Password
         </h1>
 
         <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
+          type="password"
+          placeholder="New Password"
+          value={
+            password
+          }
           onChange={(e) =>
-            setEmail(
+            setPassword(
               e.target.value
             )
           }
@@ -49,10 +59,10 @@ export default function ForgotPassword() {
 
         <button
           onClick={
-            handleSubmit
+            handleReset
           }
         >
-          Send Reset Link
+          Reset Password
         </button>
       </div>
     </div>

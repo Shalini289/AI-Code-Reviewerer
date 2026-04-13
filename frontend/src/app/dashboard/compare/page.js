@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  useState,
-} from "react";
-
-import {
-  compareCode,
-} from "@/services/compareService";
-
-import "@/styles/dashboard.css";
+import { useState } from "react";
+import { compareCode } from "@/services/compareService";
 
 export default function ComparePage() {
   const [form, setForm] =
@@ -20,7 +13,7 @@ export default function ComparePage() {
     });
 
   const [result, setResult] =
-    useState("");
+    useState(null);
 
   const handleCompare =
     async () => {
@@ -30,9 +23,7 @@ export default function ComparePage() {
             form
           );
 
-        setResult(
-          res.result
-        );
+        setResult(res);
 
       } catch (err) {
         console.log(err);
@@ -46,7 +37,7 @@ export default function ComparePage() {
       </h1>
 
       <textarea
-        placeholder="Enter First Code"
+        placeholder="First Code"
         onChange={(e) =>
           setForm({
             ...form,
@@ -58,7 +49,7 @@ export default function ComparePage() {
       />
 
       <textarea
-        placeholder="Enter Second Code"
+        placeholder="Second Code"
         onChange={(e) =>
           setForm({
             ...form,
@@ -68,33 +59,6 @@ export default function ComparePage() {
           })
         }
       />
-
-      <select
-        onChange={(e) =>
-          setForm({
-            ...form,
-            language:
-              e.target
-                .value,
-          })
-        }
-      >
-        <option>
-          javascript
-        </option>
-
-        <option>
-          python
-        </option>
-
-        <option>
-          java
-        </option>
-
-         <option>
-          c++
-        </option>
-      </select>
 
       <button
         onClick={
@@ -106,13 +70,57 @@ export default function ComparePage() {
 
       {result && (
         <div className="compare-result">
-          <h2>
-            Result
-          </h2>
 
-          <p>
-            {result}
-          </p>
+          <div className="result-card winner">
+            <h3>
+              🏆 Better Code
+            </h3>
+            <p>
+              {
+                result.betterCode
+              }
+            </p>
+          </div>
+
+          <div className="result-card">
+            <h3>
+              ⚡ Performance
+            </h3>
+            <p>
+              {
+                result.performance
+              }
+            </p>
+          </div>
+
+          <div className="result-card">
+            <h3>
+              📖 Readability
+            </h3>
+            <p>
+              {
+                result.readability
+              }
+            </p>
+          </div>
+
+          <div className="result-card">
+            <h3>
+              🚀 Suggestions
+            </h3>
+
+            <ul>
+             {result?.suggestions?.map((item,i)=> (
+                  <li
+                    key={i}
+                  >
+                    {item}
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
+
         </div>
       )}
     </div>

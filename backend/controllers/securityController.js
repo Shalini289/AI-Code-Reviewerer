@@ -1,12 +1,11 @@
 const axios =
   require("axios");
 
-exports.compareCode =
+exports.scanSecurity =
   async (req, res) => {
     try {
       const {
-        code1,
-        code2,
+        code,
         language,
       } = req.body;
 
@@ -21,13 +20,14 @@ exports.compareCode =
               {
                 role: "system",
                 content: `
-Compare two code snippets and return ONLY JSON:
+Analyze the code for security vulnerabilities.
+
+Return ONLY JSON:
 
 {
-  "betterCode": "",
-  "performance": "",
-  "readability": "",
-  "suggestions": []
+ "riskLevel":"",
+ "vulnerabilities":[],
+ "recommendations":[]
 }
 `,
               },
@@ -35,13 +35,9 @@ Compare two code snippets and return ONLY JSON:
               {
                 role: "user",
                 content: `
-Language: ${language}
+Language:${language}
 
-Code 1:
-${code1}
-
-Code 2:
-${code2}
+${code}
 `,
               },
             ],
@@ -61,11 +57,6 @@ ${code2}
           .message
           .content;
 
-      console.log(
-        "RAW AI:",
-        aiText
-      );
-
       let parsed;
 
       try {
@@ -73,34 +64,18 @@ ${code2}
           JSON.parse(aiText);
       } catch {
         parsed = {
-          betterCode:
-            aiText,
-          performance:
-            "Not Available",
-          readability:
-            "Not Available",
-          suggestions: [],
+          riskLevel:
+            "Unknown",
+          vulnerabilities:
+            [],
+          recommendations:
+            [],
         };
       }
 
-      res.json({
-        betterCode:
-          parsed.betterCode ||
-          "",
-        performance:
-          parsed.performance ||
-          "",
-        readability:
-          parsed.readability ||
-          "",
-        suggestions:
-          parsed.suggestions ||
-          [],
-      });
+      res.json(parsed);
 
     } catch (err) {
-      console.log(err);
-
       res.status(500).json({
         message:
           err.message,

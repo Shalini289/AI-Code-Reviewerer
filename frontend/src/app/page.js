@@ -1,6 +1,6 @@
 import Link from "next/link";
 import "@/styles/landing.css";
-import Navbar from "@/components/common/Navbar";
+import Navbar from "@/components/Navbar";
 export default function Home() {
   return (
     <>
