@@ -4,7 +4,7 @@ export const compareCode =
   async (data) => {
     const res =
       await api.post(
-        "/compare",
+        "api/compare",
         data
       );
 

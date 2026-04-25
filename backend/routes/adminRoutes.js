@@ -8,7 +8,7 @@ const auth =
   require("../middleware/authMiddleware");
 
 const admin =
-  require("../middleware/adminMiddleware");
+  require("../middleware/adminMiddleware.js");
 
 const {
   getAdminStats,

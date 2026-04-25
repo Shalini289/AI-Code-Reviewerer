@@ -4,7 +4,7 @@ export const reviewCode =
   async (data) => {
     const res =
       await api.post(
-        "/review/code",
+        "/api/review/code",
         data
       );
 
@@ -17,7 +17,7 @@ export const getReviewHistory =
   async () => {
     const res =
       await api.get(
-        "/review/history"
+        "/api/review/history"
       );
 
     return res.data;
@@ -27,7 +27,7 @@ export const deleteReview =
   async (id) => {
     const res =
       await api.delete(
-        `/review/${id}`
+        `/api/review/${id}`
       );
 
     return res.data;

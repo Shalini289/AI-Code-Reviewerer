@@ -4,7 +4,7 @@ export const getBillingInfo =
   async () => {
     const res =
       await api.get(
-        "/billing"
+        "/api/billing"
       );
 
     return res.data;

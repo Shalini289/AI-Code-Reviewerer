@@ -4,7 +4,7 @@ export const registerUser =
   async (data) => {
     const res =
       await api.post(
-        "/auth/register",
+        "/api/auth/register",
         data
       );
 
@@ -15,7 +15,7 @@ export const registerUser =
 
 export const loginUser = async (data) => {
   const res = await api.post(
-    "/auth/login",
+    "/api/auth/login",
     data
   );
 

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import "@/styles/landing.css";
 import Navbar from "@/components/Navbar";
+
 export default function Home() {
+  
   return (
     <>
-    
+   
   <Navbar />
 
 

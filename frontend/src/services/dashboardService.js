@@ -4,7 +4,7 @@ export const getDashboardData =
   async () => {
     const res =
       await api.get(
-        "/dashboard"
+        "/api/dashboard"
       );
 
     return res.data;

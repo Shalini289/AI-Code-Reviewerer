@@ -4,7 +4,7 @@ export const reviewGithubRepo =
   async (repoUrl) => {
     const res =
       await api.post(
-        "/github/review",
+        "/api/github/review",
         { repoUrl }
       );
 

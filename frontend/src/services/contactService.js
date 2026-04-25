@@ -4,7 +4,7 @@ export const submitContact =
   async (data) => {
     const res =
       await api.post(
-        "/contact",
+        "/api/contact",
         data
       );
 

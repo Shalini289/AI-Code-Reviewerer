@@ -1,137 +1,78 @@
 "use client";
 
-import {
-  useState,
-} from "react";
+import { useState } from "react";
+import { reviewGithubRepo } from "@/services/githubService";
 
-import {
-  reviewGithubRepo,
-} from "@/services/githubService";
+import "@/styles/dashboard.css";
 
 export default function GithubReviewPage() {
-  const [repoUrl, setRepoUrl] =
-    useState("");
+  const [repoUrl, setRepoUrl] = useState("");
+  const [review, setReview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const [review, setReview] =
-    useState(null);
+  const handleReview = async () => {
+    try {
+      setLoading(true);
 
-  const [loading, setLoading] =
-    useState(false);
+      const res = await reviewGithubRepo(repoUrl);
 
-  const handleReview =
-    async () => {
-      try {
-        setLoading(true);
+      console.log("REVIEW:", res);
 
-        const res =
-          await reviewGithubRepo(
-            repoUrl
-          );
-
-        setReview(res);
-
-      } catch (err) {
-        console.log(err);
-
-      } finally {
-        setLoading(false);
-      }
-    };
+      setReview(res);
+    } catch (err) {
+      console.log(err);
+      alert("Failed to analyze repo");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="github-page">
-      <h1>
-        GitHub Repo Review
-      </h1>
+      <h1>GitHub Repo Review</h1>
 
       <input
         type="text"
-        placeholder="Enter Repo URL"
+        placeholder="https://github.com/username/repo"
         value={repoUrl}
-        onChange={(e) =>
-          setRepoUrl(
-            e.target.value
-          )
-        }
+        onChange={(e) => setRepoUrl(e.target.value)}
       />
 
-      <button
-        onClick={
-          handleReview
-        }
-      >
-        {loading
-          ? "Reviewing..."
-          : "Analyze Repo"}
+      <button onClick={handleReview}>
+        {loading ? "Analyzing..." : "Analyze Repo"}
       </button>
 
+      {/* RESULT UI */}
       {review && (
-        <div className="github-result">
+        <div className="review-grid">
 
-          <div className="result-card">
-            <h3>
-              📌 Project Summary
-            </h3>
-            <p>
-              {
-                review.summary
-              }
-            </p>
+          <div className="review-card">
+            <h3>📌 Summary</h3>
+            <p>{review.summary}</p>
           </div>
 
-          <div className="result-card">
-            <h3>
-              ⚡ Code Quality
-            </h3>
-            <p>
-              {
-                review.codeQuality
-              }
-            </p>
+          <div className="review-card">
+            <h3>⚡ Code Quality</h3>
+            <p>{review.codeQuality}</p>
           </div>
 
-          <div className="result-card">
-            <h3>
-              🏗 Architecture
-            </h3>
-            <p>
-              {
-                review.architecture
-              }
-            </p>
+          <div className="review-card">
+            <h3>🏗 Architecture</h3>
+            <p>{review.architecture}</p>
           </div>
 
-          <div className="result-card">
-            <h3>
-              🔒 Security
-            </h3>
-            <p>
-              {
-                review.security
-              }
-            </p>
+          <div className="review-card">
+            <h3>🔒 Security</h3>
+            <p>{review.security}</p>
           </div>
 
-          <div className="result-card">
-            <h3>
-              🚀 Suggestions
-            </h3>
+          <div className="review-card full-width">
+            <h3>🚀 Suggestions</h3>
 
             <ul>
-              {(review
-                ?.suggestions ||
-                []).map(
-                (
-                  item,
-                  i
-                ) => (
-                  <li
-                    key={i}
-                  >
-                    {item}
-                  </li>
-                )
-              )}
+              {(review?.suggestions || []).map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
             </ul>
           </div>
 

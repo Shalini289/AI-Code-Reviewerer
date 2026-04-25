@@ -124,7 +124,7 @@ export default function ContactPage() {
           </p>
 
           <p>
-            📞 +91 9876543210
+            📞 +91 3456543210
           </p>
 
           <p>

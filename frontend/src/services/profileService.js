@@ -4,7 +4,7 @@ export const getProfile =
   async () => {
     const res =
       await api.get(
-        "/profile"
+        "api/profile"
       );
 
     return res.data;

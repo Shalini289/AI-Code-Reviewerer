@@ -40,6 +40,6 @@ export const getReviews =
 export const deleteReview =
   async (id) => {
     await api.delete(
-      `/admin/reviews/${id}`
+      `/api/admin/reviews/${id}`
     );
   };

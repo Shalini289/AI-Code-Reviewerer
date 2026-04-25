@@ -4,7 +4,7 @@ export const upgradePlan =
   async (plan) => {
     const res =
       await api.put(
-        "/payment/upgrade",
+        "api/payment/upgrade",
         { plan }
       );
 

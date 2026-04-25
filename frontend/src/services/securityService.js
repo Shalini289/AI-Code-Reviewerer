@@ -4,7 +4,7 @@ export const scanSecurity =
   async (data) => {
     const res =
       await api.post(
-        "/security/scan",
+        "/api/security/scan",
         data
       );
 

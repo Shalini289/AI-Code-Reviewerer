@@ -26,7 +26,7 @@ export const deleteAccount =
   async () => {
     const res =
       await api.delete(
-        "/user/delete"
+        "/api/user/delete"
       );
 
     return res.data;

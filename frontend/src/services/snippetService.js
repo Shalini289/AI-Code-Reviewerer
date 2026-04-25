@@ -4,7 +4,7 @@ export const createSnippet =
   async (data) => {
     const res =
       await api.post(
-        "/snippets",
+        "/api/snippets",
         data
       );
 
@@ -15,7 +15,7 @@ export const getSnippets =
   async () => {
     const res =
       await api.get(
-        "/snippets"
+        "/api/snippets"
       );
 
     return res.data;
@@ -24,6 +24,6 @@ export const getSnippets =
 export const deleteSnippet =
   async (id) => {
     await api.delete(
-      `/snippets/${id}`
+      `/api/snippets/${id}`
     );
   };
