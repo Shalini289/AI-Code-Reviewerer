@@ -21,14 +21,40 @@ exports.compareCode =
               {
                 role: "system",
                 content: `
-Compare two code snippets and return ONLY JSON:
+You are a senior software engineer.
+
+Compare the following two code snippets and return ONLY valid JSON:
 
 {
-  "betterCode": "",
-  "performance": "",
-  "readability": "",
-  "suggestions": []
+  "winner": "",
+  "reason": "",
+  "comparison": {
+    "performance": "",
+    "readability": "",
+    "bestPractices": ""
+  },
+  "pros": {
+    "code1": [],
+    "code2": []
+  },
+  "cons": {
+    "code1": [],
+    "code2": []
+  },
+  "improvements": {
+    "code1": [],
+    "code2": []
+  }
 }
+
+Rules:
+- "winner" must be "Code 1" or "Code 2"
+- Be concise (short sentences)
+- Use simple language
+- Avoid long paragraphs
+- Suggestions must be actionable
+- If no issue, return empty array []
+- DO NOT return anything outside JSON
 `,
               },
 
@@ -73,29 +99,36 @@ ${code2}
           JSON.parse(aiText);
       } catch {
         parsed = {
-          betterCode:
+          winner:
             aiText,
-          performance:
+          reason:
             "Not Available",
-          readability:
-            "Not Available",
-          suggestions: [],
+          comparison:[],
+          pros: [],
+          cons: [],
+          improvements:[],
         };
       }
 
       res.json({
-        betterCode:
-          parsed.betterCode ||
+        winner:
+          parsed.winner ||
           "",
-        performance:
-          parsed.performance ||
+        reason:
+          parsed.reason ||
           "",
-        readability:
-          parsed.readability ||
-          "",
-        suggestions:
-          parsed.suggestions ||
+        comparison:
+          parsed.comparison ||
           [],
+        pros:
+          parsed.pros ||
+          [],
+          cons: 
+          parsed.cons ||
+          [],
+           improvements:
+           parsed. improvements || 
+           [],
       });
 
     } catch (err) {

@@ -13,7 +13,7 @@ export default function Login() {
     email: "",
     password: "",
   });
-
+ localStorage.setItem("token", res.token);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +80,9 @@ export default function Login() {
           value={form.password}
           onChange={handleChange}
         />
+        <Link href="/forgot-password">
+  Forgot Password?
+</Link>
 
         <button type="submit">
           {loading

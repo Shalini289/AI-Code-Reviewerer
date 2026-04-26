@@ -38,8 +38,11 @@ export default function ResetPassword() {
     };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="auth-container">
+      <form
+        className="auth-form"
+        onSubmit={handleReset}
+      >
         <h1>
           Reset Password
         </h1>
@@ -57,14 +60,10 @@ export default function ResetPassword() {
           }
         />
 
-        <button
-          onClick={
-            handleReset
-          }
-        >
+        <button type="submit">
           Reset Password
         </button>
-      </div>
+      </form>
     </div>
   );
 }

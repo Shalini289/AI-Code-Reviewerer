@@ -50,6 +50,10 @@ export default function GithubReviewPage() {
             <h3>📌 Summary</h3>
             <p>{review.summary}</p>
           </div>
+           <div className="review-card">
+            <h3>Health Scoree</h3>
+            <p>{review.healthScore}</p>
+          </div>
 
           <div className="review-card">
             <h3>⚡ Code Quality</h3>
@@ -65,7 +69,23 @@ export default function GithubReviewPage() {
             <h3>🔒 Security</h3>
             <p>{review.security}</p>
           </div>
+ <div className="review-card">
+            <h3>Documentation</h3>
+            <p>{review.documentation}</p>
+          </div>
 
+           <div className="review-card">
+            <h3>Maintainability</h3>
+            <p>{review.maintainability}</p>
+          </div>
+           <div className="review-card">
+            <h3>Weaknesses</h3>
+            <p>{review.weaknesses}</p>
+          </div>
+           <div className="review-card">
+            <h3>Strengths</h3>
+            <p>{review.strengths}</p>
+          </div>
           <div className="review-card full-width">
             <h3>🚀 Suggestions</h3>
 

@@ -11,6 +11,7 @@ export default function ContactPage() {
     message: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -23,12 +24,9 @@ export default function ContactPage() {
     e.preventDefault();
 
     try {
-      const res =
-        await submitContact(
-          form
-        );
+     setLoading(true);
 
-      console.log(res);
+      await submitContact(form);
 
       alert(
         "Message Sent!"
@@ -48,6 +46,9 @@ export default function ContactPage() {
       alert(
         "Failed to send message"
       );
+    }
+    finally {
+      setLoading(false);
     }
   };
 

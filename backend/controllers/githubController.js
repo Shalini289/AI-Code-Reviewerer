@@ -49,20 +49,44 @@ exports.reviewGithubRepo = async (req, res) => {
 
     // ✅ 4. Prepare prompt for AI
     const prompt = `
-Analyze this GitHub repository and return ONLY JSON:
+You are a senior software architect reviewing a GitHub repository.
+
+Analyze the repository using the provided metadata and return ONLY valid JSON in this exact format:
 
 {
   "summary": "",
+  "healthScore": 0,
   "codeQuality": "",
   "architecture": "",
   "security": "",
+  "documentation": "",
+  "maintainability": "",
+  "strengths": [],
+  "weaknesses": [],
   "suggestions": []
 }
+
+Rules:
+- "healthScore" must be an integer from 1 to 10
+- Keep explanations short (1–2 sentences max)
+- Use simple, clear language
+- Focus on practical insights
+- Arrays must contain short bullet points
+- If no issue, return empty array []
+- DO NOT include any text outside JSON
+- DO NOT add markdown, comments, or explanations
+
+Evaluate based on:
+- Repo structure and organization
+- Language and ecosystem best practices
+- Maintainability and scalability
+- Security risks (general patterns)
+- Documentation quality
 
 Repository Info:
 Name: ${data.name}
 Description: ${data.description || "No description"}
-Language: ${data.language}
+Primary Language: ${data.language}
 Stars: ${data.stargazers_count}
 Forks: ${data.forks_count}
 Open Issues: ${data.open_issues_count}
@@ -114,9 +138,14 @@ Open Issues: ${data.open_issues_count}
 
       parsed = {
         summary: aiText,
+        healthScore: "Not available",
         codeQuality: "Not available",
         architecture: "Not available",
         security: "Not available",
+        documentation:"Not available",
+        maintainability:"Not available",
+strengths:[],
+        weaknesses:[],
         suggestions: [],
       };
     }
@@ -124,9 +153,14 @@ Open Issues: ${data.open_issues_count}
     // ✅ 7. Final structured response
     return res.json({
       summary: parsed.summary || "",
+      healthScore:parsed.healthScore || "",
       codeQuality: parsed.codeQuality || "",
       architecture: parsed.architecture || "",
       security: parsed.security || "",
+      documentation:parsed.documentation || "",
+      maintainability:parsed.maintainability || "",
+strengths:parsed.strengths || [],
+weaknesses:parsed.weaknesses || [],
       suggestions: parsed.suggestions || [],
     });
 

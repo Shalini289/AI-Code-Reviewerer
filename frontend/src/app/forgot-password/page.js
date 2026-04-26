@@ -1,12 +1,11 @@
 "use client";
-
+import "@/styles/auth.css";
 import {
   useState,
 } from "react";
 
 import api from "@/utils/api";
 
-import "@/styles/auth.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] =
@@ -30,8 +29,11 @@ export default function ForgotPassword() {
     };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="auth-container">
+      <form
+        className="auth-form"
+        onSubmit={handleSubmit}
+      >
         <h1>
           Forgot Password
         </h1>
@@ -47,14 +49,10 @@ export default function ForgotPassword() {
           }
         />
 
-        <button
-          onClick={
-            handleSubmit
-          }
-        >
+        <button type="submit">
           Send Reset Link
         </button>
-      </div>
+    </form>
     </div>
   );
 }

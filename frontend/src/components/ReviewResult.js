@@ -4,6 +4,27 @@ export default function ReviewResult({
   return (
     <div className="review-results">
 
+<div className="review-card">
+        <h3>Summary</h3>
+
+        <ul>
+          {result?.summary
+            ?.length > 0 ? (
+            result.summary.map(
+              (sec, i) => (
+                <li key={i}>
+                  {sec}
+                </li>
+              )
+            )
+          ) : (
+            <li>
+              No Summary
+            </li>
+          )}
+        </ul>
+      </div>
+
       <div className="review-card bugs">
         <h3>🐛 Bugs</h3>
 
@@ -22,22 +43,43 @@ export default function ReviewResult({
         </ul>
       </div>
 
-      <div className="review-card">
-        <h3>⚡ Optimizations</h3>
+<div className="review-card">
+        <h3>Performance</h3>
 
         <ul>
-          {result?.optimizations
+          {result?.performance
             ?.length > 0 ? (
-            result.optimizations.map(
-              (opt, i) => (
+            result.performance.map(
+              (sec, i) => (
                 <li key={i}>
-                  {opt}
+                  {sec}
                 </li>
               )
             )
           ) : (
             <li>
-              No Suggestions
+              No Performance Issues
+            </li>
+          )}
+        </ul>
+      </div>
+
+          <div className="review-card">
+        <h3>Readability</h3>
+
+        <ul>
+          {result?.readibility
+            ?.length > 0 ? (
+            result.readibility.map(
+              (sec, i) => (
+                <li key={i}>
+                  {sec}
+                </li>
+              )
+            )
+          ) : (
+            <li>
+              No Security Issues
             </li>
           )}
         </ul>
@@ -87,6 +129,26 @@ export default function ReviewResult({
         </ul>
       </div>
 
+<div className="review-card">
+        <h3>Improvements</h3>
+
+        <ul>
+          {result?.improvements
+            ?.length > 0 ? (
+            result.improvements.map(
+              (sec, i) => (
+                <li key={i}>
+                  {sec}
+                </li>
+              )
+            )
+          ) : (
+            <li>
+              No Security Issues
+            </li>
+          )}
+        </ul>
+      </div>
       <div className="complexity-box">
         <span>
           Time:

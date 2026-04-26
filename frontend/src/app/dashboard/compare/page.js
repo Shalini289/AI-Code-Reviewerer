@@ -77,49 +77,63 @@ export default function ComparePage() {
             </h3>
             <p>
               {
-                result.betterCode
+                result.winner
               }
             </p>
           </div>
 
-          <div className="result-card">
+ <div className="result-card ">
             <h3>
-              ⚡ Performance
+              Reason
             </h3>
             <p>
               {
-                result.performance
+                result.reason
               }
             </p>
           </div>
 
           <div className="result-card">
             <h3>
-              📖 Readability
+              ⚡ Comparison
             </h3>
             <p>
               {
-                result.readability
+                result.comparison
               }
             </p>
           </div>
-
+ <div className="result-card">
+            <h3>
+               Pros
+            </h3>
+            <p>
+              {
+                result.pros
+              }
+            </p>
+          </div>
           <div className="result-card">
             <h3>
-              🚀 Suggestions
+              Cons
             </h3>
-
-            <ul>
-             {result?.suggestions?.map((item,i)=> (
-                  <li
-                    key={i}
-                  >
-                    {item}
-                  </li>
-                )
-              )}
-            </ul>
+            <p>
+              {
+                result.cons
+              }
+            </p>
           </div>
+ <div className="result-card">
+            <h3>
+              Improvements
+            </h3>
+            <p>
+              {
+                result.improvements
+              }
+            </p>
+          </div>
+         
 
         </div>
       )}

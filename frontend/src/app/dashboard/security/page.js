@@ -109,7 +109,17 @@ export default function SecurityPage() {
               }
             </p>
           </div>
+ <div className="result-card">
+            <h3>
+              Summary
+            </h3>
 
+            <p>
+              {
+                result.summary
+              }
+            </p>
+          </div>
           <div className="result-card">
             <h3>
               Vulnerabilities
@@ -135,12 +145,12 @@ export default function SecurityPage() {
 
           <div className="result-card">
             <h3>
-              Recommendations
+              Best Practices
             </h3>
 
             <ul>
               {(result
-                ?.recommendations ||
+                ?.bestPractices ||
                 []).map(
                 (
                   item,
@@ -155,7 +165,17 @@ export default function SecurityPage() {
               )}
             </ul>
           </div>
+ <div className="result-card ">
+            <h3>
+           Secure Code
+            </h3>
 
+            <p>
+              {
+                result.secureCodeExample
+              }
+            </p>
+          </div>
         </div>
       )}
     </div>

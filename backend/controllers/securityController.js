@@ -20,15 +20,34 @@ exports.scanSecurity =
               {
                 role: "system",
                 content: `
-Analyze the code for security vulnerabilities.
+You are a senior security engineer.
 
-Return ONLY JSON:
+Analyze the following code for security vulnerabilities and return ONLY valid JSON:
 
 {
- "riskLevel":"",
- "vulnerabilities":[],
- "recommendations":[]
+  "riskLevel": "",
+  "summary": "",
+  "vulnerabilities": [
+    {
+      "issue": "",
+      "severity": "",
+      "description": "",
+      "fix": ""
+    }
+  ],
+  "bestPractices": [],
+  "secureCodeExample": ""
 }
+
+Rules:
+- "riskLevel" must be: Low, Medium, High, or Critical
+- "severity" must be: Low, Medium, High, or Critical
+- Keep explanations short and simple
+- Focus only on real security issues (no general advice)
+- Each vulnerability must include a fix
+- If no vulnerabilities → return empty array []
+- "secureCodeExample" should be improved version of code (short)
+- DO NOT include any text outside JSON
 `,
               },
 
@@ -66,10 +85,14 @@ ${code}
         parsed = {
           riskLevel:
             "Unknown",
+            summary:
+            "Not Available",
           vulnerabilities:
             [],
-          recommendations:
+          bestPractices:
             [],
+            secureCodeExample:
+            "",
         };
       }
 
