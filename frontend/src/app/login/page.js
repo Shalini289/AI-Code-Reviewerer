@@ -13,7 +13,7 @@ export default function Login() {
     email: "",
     password: "",
   });
- localStorage.setItem("token", res.token);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,11 +33,14 @@ export default function Login() {
 
       const res = await loginUser(form);
 
-      localStorage.setItem("token", res.token);
-      localStorage.setItem(
+     useEffect(() => {
+  localStorage.getItem("token");
+  localStorage.setItem(
         "user",
         JSON.stringify(res.user)
       );
+}, []);
+      
 
       router.push("/dashboard");
 
