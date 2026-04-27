@@ -1,39 +1,93 @@
 const Review =require("../models/Review");
+const axios = require("axios");
 
-const reviewWithAI =require("../services/aiService");
 
-exports.reviewCode =
-  async (req, res) => {
-    try {
-      const {
-        code,
-        language,
-      } = req.body;
+exports.reviewCode = async (req, res) => {
+  try {
+    const { code, language } = req.body;
 
-      const aiResult =
-        await reviewWithAI(
-          code,
-          language
-        );
-
-      const review =
-        await Review.create({
-          user:
-            req.user.id,
-          code,
-          result:
-            aiResult,
-        });
-
-      res.json(review);
-
-    } catch (err) {
-      res.status(500).json({
-        message:
-          err.message,
+    if (!code) {
+      return res.status(400).json({
+        message: "Code is required",
       });
     }
-  };
+
+    const prompt = `
+You are a senior software engineer.
+
+Analyze the code and return ONLY valid JSON:
+
+{
+  "summary": "",
+  "bugs": [],
+  "performance": "",
+  "readability": "",
+  "bestPractices": [],
+  "security": "",
+  "improvements": []
+}
+
+Rules:
+- Be concise
+- Use simple language
+- No text outside JSON
+
+Language: ${language}
+Code:
+${code}
+`;
+
+    const aiRes = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content: "Return ONLY valid JSON",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+      }
+    );
+
+    const aiText =
+      aiRes.data?.choices?.[0]?.message?.content || "";
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(aiText);
+    } catch {
+      parsed = {
+        summary: aiText,
+        bugs: [],
+        performance: "",
+        readability: "",
+        bestPractices: [],
+        security: "",
+        improvements: [],
+      };
+    }
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.log(err.message);
+
+    res.status(500).json({
+      message: "Review failed",
+    });
+  }
+};
 
 exports.getReviewHistory =
   async (req, res) => {
