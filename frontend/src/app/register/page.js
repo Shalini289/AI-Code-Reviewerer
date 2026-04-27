@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { registerUser } from "@/services/authService";
 
 import "@/styles/auth.css";
 
 export default function Register() {
   const router = useRouter();
-
+  const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -149,24 +149,54 @@ if (!passwordRegex.test(form.password)) {
           value={form.email}
           onChange={handleChange}
         />
+<div style={{ position: "relative" }}>
+  <input
+    type={show ? "text" : "password"}
+    name="password"
+    placeholder="Password"
+    value={form.password}
+    onChange={handleChange}
+    style={{ width: "100%", paddingRight: "40px" }}
+  />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
+  <span
+    onClick={() => setShow(!show)}
+    style={{
+      position: "absolute",
+      right: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      fontSize: "18px"
+    }}
+  >
+    {show ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
+<div style={{ position: "relative" }}>
+  <input
+    type={show ? "text" : "password"}
+    name="password"
+    placeholder="Password"
+    value={form.password}
+    onChange={handleChange}
+    style={{ width: "100%", paddingRight: "40px" }}
+  />
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={
-            form.confirmPassword
-          }
-          onChange={handleChange}
-        />
+  <span
+    onClick={() => setShow(!show)}
+    style={{
+      position: "absolute",
+      right: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      fontSize: "18px"
+    }}
+  >
+    {show ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
 
         <button type="submit">
           {loading

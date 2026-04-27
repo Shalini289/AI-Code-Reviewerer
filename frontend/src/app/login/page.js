@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginUser } from "@/services/authService";
 import "@/styles/auth.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function Login() {
   const router = useRouter();
-
+ const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -75,14 +76,30 @@ export default function Login() {
           value={form.email}
           onChange={handleChange}
         />
+<div style={{ position: "relative" }}>
+  <input
+    type={show ? "text" : "password"}
+    name="password"
+    placeholder="Password"
+    value={form.password}
+    onChange={handleChange}
+    style={{ width: "100%", paddingRight: "40px" }}
+  />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
+  <span
+    onClick={() => setShow(!show)}
+    style={{
+      position: "absolute",
+      right: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      fontSize: "18px"
+    }}
+  >
+    {show ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
         <Link href="/forgot-password">
   Forgot Password?
 </Link>
