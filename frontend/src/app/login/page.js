@@ -78,7 +78,7 @@ export default function Login() {
         />
 <div style={{ position: "relative" }}>
   <input
-    type={show ? "text" : "password"}
+    
     name="password"
     placeholder="Password"
     value={form.password}
