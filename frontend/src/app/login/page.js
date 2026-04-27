@@ -9,7 +9,7 @@ import "@/styles/auth.css";
 
 export default function Login() {
   const router = useRouter();
-
+ const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -78,7 +78,7 @@ export default function Login() {
         />
 <div style={{ position: "relative" }}>
   <input
-    
+    type={show ? "text" : "password"}
     name="password"
     placeholder="Password"
     value={form.password}

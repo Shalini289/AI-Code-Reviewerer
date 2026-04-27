@@ -10,7 +10,7 @@ import "@/styles/auth.css";
 
 export default function Register() {
   const router = useRouter();
-
+ const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
