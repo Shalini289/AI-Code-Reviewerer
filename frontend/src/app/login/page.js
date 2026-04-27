@@ -82,7 +82,7 @@ export default function Login() {
     name="password"
     placeholder="Password"
     value={form.password}
-    onChange={handleChange}
+    onChange={handleSubmit}
     style={{ width: "100%", paddingRight: "40px" }}
   />
 
