@@ -6,10 +6,9 @@ import Link from "next/link";
 import { loginUser } from "@/services/authService";
 import "@/styles/auth.css";
 
-
 export default function Login() {
   const router = useRouter();
- const [show, setShow] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -34,21 +33,22 @@ export default function Login() {
 
       const res = await loginUser(form);
 
-     useEffect(() => {
-  localStorage.getItem("token");
-  localStorage.setItem(
+      // ✅ STORE TOKEN
+      localStorage.setItem("token", res.token);
+
+      // ✅ STORE USER
+      localStorage.setItem(
         "user",
         JSON.stringify(res.user)
       );
-}, []);
-      
 
+      // ✅ REDIRECT
       router.push("/dashboard");
 
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Login failed"
+        "Login failed"
       );
     } finally {
       setLoading(false);
@@ -69,6 +69,7 @@ export default function Login() {
           </div>
         )}
 
+        {/* EMAIL */}
         <input
           type="email"
           name="email"
@@ -76,30 +77,31 @@ export default function Login() {
           value={form.email}
           onChange={handleChange}
         />
-<div style={{ position: "relative" }}>
-  <input
-    type={show ? "text" : "password"}
-    name="password"
-    placeholder="Password"
-    value={form.password}
-    onSubmit={handleSubmit}
-    style={{ width: "100%", paddingRight: "40px" }}
-  />
 
+        {/* PASSWORD */}
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+        />
 
-</div>
+        {/* FORGOT */}
         <Link href="/forgot-password">
-  Forgot Password?
-</Link>
+          Forgot Password?
+        </Link>
 
+        {/* BUTTON */}
         <button type="submit">
           {loading
             ? "Logging in..."
             : "Login"}
         </button>
 
+        {/* REGISTER */}
         <p>
-          No account?
+          No account?{" "}
           <Link href="/register">
             Register
           </Link>
