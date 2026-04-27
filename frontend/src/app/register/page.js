@@ -176,9 +176,9 @@ if (!passwordRegex.test(form.password)) {
 <div style={{ position: "relative" }}>
   <input
     type={show ? "text" : "password"}
-    name="confirm-password"
+    name="confirmPassword"
     placeholder="Password"
-    value={form.password}
+    value={form.confirmPassword}
     onChange={handleChange}
     style={{ width: "100%", paddingRight: "40px" }}
   />
