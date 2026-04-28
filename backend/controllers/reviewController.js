@@ -1,74 +1,65 @@
 const Review =require("../models/Review");
 const axios = require("axios");
 
-
 exports.reviewCode = async (req, res) => {
   try {
     const { code, language } = req.body;
 
-    if (!code) {
-      return res.status(400).json({
-        message: "Code is required",
-      });
-    }
+    const systemPrompt = `You are a code review API. You MUST respond with ONLY a raw JSON object.
+No markdown. No explanation. No backticks. No text before or after.
+If you deviate from JSON format, the response will be rejected.
 
-    const prompt = `
-You are a senior software engineer.
-
-Analyze the code and return ONLY valid JSON:
-
+Always use exactly this structure:
 {
-  "summary": "",
-  "bugs": [],
-  "performance": "",
-  "readability": "",
-  "bestPractices": [],
-  "security": "",
-  "improvements": []
-}
+  "summary": "one sentence describing what the code does",
+  "bugs": ["bug description 1", "bug description 2"],
+  "performance": "one sentence about performance",
+  "readability": "one sentence about readability",
+  "bestPractices": ["practice 1", "practice 2"],
+  "security": "one sentence about security",
+  "improvements": ["improvement 1", "improvement 2"]
+}`;
 
-Rules:
-- Be concise
-- Use simple language
-- No text outside JSON
+const userPrompt = `Review this ${language} code and return the JSON object:\n\`\`\`\n${code}\n\`\`\``;
 
-Language: ${language}
-Code:
-${code}
-`;
+   const aiRes = await axios.post(
+  "https://api.groq.com/openai/v1/chat/completions",
+  {
+    model: "llama-3.1-8b-instant",
+    temperature: 0.1,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user",   content: userPrompt },
+    ],
+  },
+  {
+    headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+  }
+);
 
-    const aiRes = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "system",
-            content: "Return ONLY valid JSON",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-      }
-    );
-
-    const aiText =
+    let aiText =
       aiRes.data?.choices?.[0]?.message?.content || "";
+
+    // 🔥 CLEAN RESPONSE (IMPORTANT)
+  aiText = aiText.replace(/```json|```/g, "").trim();
+
+  const start = aiText.indexOf("{");
+const end = aiText.lastIndexOf("}");
+
+  if (start !== -1 && end !== -1) {
+  aiText = aiText.substring(start, end + 1);
+}
 
     let parsed;
 
     try {
       parsed = JSON.parse(aiText);
-    } catch {
+    } catch (err) {
+      console.log("PARSE ERROR:", aiText);
+
+      // ✅ SAFE FALLBACK (NOT prompt)
       parsed = {
-        summary: aiText,
+        summary: "AI response formatting issue",
         bugs: [],
         performance: "",
         readability: "",

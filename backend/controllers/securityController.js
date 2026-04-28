@@ -1,107 +1,80 @@
-const axios =
-  require("axios");
+const axios = require("axios");
 
-exports.scanSecurity =
-  async (req, res) => {
-    try {
-      const {
-        code,
-        language,
-      } = req.body;
+exports.scanSecurity = async (req, res) => {
+  try {
+    const { code, language } = req.body;
 
-      const response =
-        await axios.post(
-          "https://api.groq.com/openai/v1/chat/completions",
-          {
-            model:
-              "llama-3.1-8b-instant",
+    if (!code) {
+      return res.status(400).json({ message: "Code is required" });
+    }
 
-            messages: [
-              {
-                role: "system",
-                content: `
-You are a senior security engineer.
+    const systemPrompt = `You are a security analysis API. You MUST respond with ONLY a raw JSON object.
+No markdown. No explanation. No backticks. No text before or after.
+If you deviate from JSON format, the response will be rejected.
 
-Analyze the following code for security vulnerabilities and return ONLY valid JSON:
-
+Always use exactly this structure:
 {
-  "riskLevel": "",
-  "summary": "",
+  "riskLevel": "Low | Medium | High | Critical",
+  "summary": "one sentence describing the overall security posture",
   "vulnerabilities": [
     {
-      "issue": "",
-      "severity": "",
-      "description": "",
-      "fix": ""
+      "issue": "name of the vulnerability",
+      "severity": "Low | Medium | High | Critical",
+      "description": "one sentence explaining the risk",
+      "fix": "one sentence explaining how to fix it"
     }
   ],
-  "bestPractices": [],
-  "secureCodeExample": ""
-}
+  "bestPractices": ["practice 1", "practice 2"],
+  "secureCodeExample": "corrected code snippet as a string"
+}`;
 
-Rules:
-- "riskLevel" must be: Low, Medium, High, or Critical
-- "severity" must be: Low, Medium, High, or Critical
-- Keep explanations short and simple
-- Focus only on real security issues (no general advice)
-- Each vulnerability must include a fix
-- If no vulnerabilities → return empty array []
-- "secureCodeExample" should be improved version of code (short)
-- DO NOT include any text outside JSON
-`,
-              },
+    const userPrompt = `Review this ${language} code for security vulnerabilities and return the JSON object:\n\`\`\`\n${code}\n\`\`\``;
 
-              {
-                role: "user",
-                content: `
-Language:${language}
-
-${code}
-`,
-              },
-            ],
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-      let aiText =
-        response.data
-          .choices[0]
-          .message
-          .content;
-
-      let parsed;
-
-      try {
-        parsed =
-          JSON.parse(aiText);
-      } catch {
-        parsed = {
-          riskLevel:
-            "Unknown",
-            summary:
-            "Not Available",
-          vulnerabilities:
-            [],
-          bestPractices:
-            [],
-            secureCodeExample:
-            "",
-        };
+    const aiRes = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user",   content: userPrompt },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
       }
+    );
 
-      res.json(parsed);
+    let aiText = aiRes.data?.choices?.[0]?.message?.content || "";
 
-    } catch (err) {
-      res.status(500).json({
-        message:
-          err.message,
-      });
+    // Clean response (same as review controller)
+    aiText = aiText.replace(/```json|```/g, "").trim();
+    const start = aiText.indexOf("{");
+    const end   = aiText.lastIndexOf("}");
+    if (start !== -1 && end !== -1) {
+      aiText = aiText.substring(start, end + 1);
     }
-  };
+
+    let parsed;
+    try {
+      parsed = JSON.parse(aiText);
+    } catch {
+      console.error("JSON parse error:", aiText);
+      parsed = {
+        riskLevel: "Unknown",
+        summary: "AI response could not be parsed",
+        vulnerabilities: [],
+        bestPractices: [],
+        secureCodeExample: "",
+      };
+    }
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Security analysis failed" });
+  }
+};

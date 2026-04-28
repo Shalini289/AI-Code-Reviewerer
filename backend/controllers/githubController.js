@@ -134,35 +134,22 @@ Open Issues: ${data.open_issues_count}
     try {
       parsed = JSON.parse(aiText);
     } catch (err) {
-      console.log("JSON PARSE FAILED:", aiText);
-
       parsed = {
         summary: aiText,
-        healthScore: "Not available",
-        codeQuality: "Not available",
-        architecture: "Not available",
-        security: "Not available",
-        documentation:"Not available",
-        maintainability:"Not available",
-strengths:[],
-        weaknesses:[],
+        healthScore: 5,
+        codeQuality: "",
+        architecture: "",
+        security: "",
+        documentation: "",
+        maintainability: "",
+        strengths: [],
+        weaknesses: [],
         suggestions: [],
       };
     }
 
     // ✅ 7. Final structured response
-    return res.json({
-      summary: parsed.summary || "",
-      healthScore:parsed.healthScore || "",
-      codeQuality: parsed.codeQuality || "",
-      architecture: parsed.architecture || "",
-      security: parsed.security || "",
-      documentation:parsed.documentation || "",
-      maintainability:parsed.maintainability || "",
-strengths:parsed.strengths || [],
-weaknesses:parsed.weaknesses || [],
-      suggestions: parsed.suggestions || [],
-    });
+    return res.json(parsed);
 
   } catch (err) {
     console.log("SERVER ERROR:", err);

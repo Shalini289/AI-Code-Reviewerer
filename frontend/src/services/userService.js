@@ -1,33 +1,19 @@
 import api from "@/utils/api";
 
-export const updateProfile =
-  async (data) => {
-    const res =
-      await api.put(
-        "/user/update",
-        data
-      );
+export const getProfile = async () => {
+  const res = await api.get("/api/user/profile");
+  return res.data;
+};
 
-    return res.data;
-  };
+export const updateProfile = async (data) => {
+  const res = await api.put("/api/user/profile", data);
+  return res.data;
+};
 
-export const changePassword =
-  async (data) => {
-    const res =
-      await api.put(
-        "/user/change-password",
-        data
-      );
-
-    return res.data;
-  };
-
-export const deleteAccount =
-  async () => {
-    const res =
-      await api.delete(
-        "/api/user/delete"
-      );
-
-    return res.data;
-  };
+export const changePassword = async (data) => {
+  const res = await api.put(
+    "/api/user/change-password",
+    data
+  );
+  return res.data;
+};

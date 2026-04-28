@@ -1,105 +1,60 @@
-const User =
-  require("../models/User");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
-const bcrypt =
-  require("bcryptjs");
+// ✅ GET PROFILE
+exports.getProfile = async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
 
-exports.updateProfile =
-  async (req, res) => {
-    try {
-      const {
-        name,
-        email,
-      } = req.body;
+  res.json(user);
+};
 
-      const user =
-        await User.findByIdAndUpdate(
-          req.user.id,
-          {
-            name,
-            email,
-          },
-          {
-            new: true,
-          }
-        );
+// ✅ UPDATE NAME
+exports.updateProfile = async (req, res) => {
+  const { name } = req.body;
 
-      res.json(user);
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { name },
+    { new: true }
+  ).select("-password");
 
-    } catch (err) {
-      res.status(500).json({
-        message:
-          err.message,
+  res.json(user);
+};
+
+// ✅ CHANGE PASSWORD (FIXED)
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        message: "All fields required",
       });
     }
-  };
 
-exports.changePassword =
-  async (req, res) => {
-    try {
-      const {
-        oldPassword,
-        newPassword,
-      } = req.body;
+    const user = await User.findById(req.user.id);
 
-      const user =
-        await User.findById(
-          req.user.id
-        );
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      user.password
+    );
 
-      const isMatch =
-        await bcrypt.compare(
-          oldPassword,
-          user.password
-        );
-
-      if (!isMatch) {
-        return res.status(400).json({
-          message:
-            "Wrong old password",
-        });
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          newPassword,
-          10
-        );
-
-      user.password =
-        hashedPassword;
-
-      await user.save();
-
-      res.json({
-        message:
-          "Password updated",
-      });
-
-    } catch (err) {
-      res.status(500).json({
-        message:
-          err.message,
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Old password incorrect",
       });
     }
-  };
 
-exports.deleteAccount =
-  async (req, res) => {
-    try {
-      await User.findByIdAndDelete(
-        req.user.id
-      );
+    user.password = newPassword; // will auto-hash
+    await user.save();
 
-      res.json({
-        message:
-          "Account deleted",
-      });
+    res.json({
+      message: "Password updated successfully",
+    });
 
-    } catch (err) {
-      res.status(500).json({
-        message:
-          err.message,
-      });
-    }
-  };
+  } catch (err) {
+    res.status(500).json({
+      message: "Password change failed",
+    });
+  }
+};

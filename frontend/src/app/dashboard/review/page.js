@@ -1,137 +1,69 @@
 "use client";
 
 import { useState } from "react";
-import "@/styles/dashboard.css";
 import { reviewCode } from "@/services/reviewService";
-import ReviewResult from"@/components/ReviewResult"
+import ReviewResult from "@/components/ReviewResult";
+import "@/styles/dashboard.css";
+
 export default function ReviewPage() {
-  const [code, setCode] =
-    useState("");
+  const [code, setCode] = useState("");
+  const [language, setLanguage] = useState("javascript");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [language, setLanguage] =
-    useState("javascript");
+  const handleReview = async () => {
+    if (!code.trim()) {
+      setError("Please enter code");
+      return;
+    }
 
-  const [loading, setLoading] =
-    useState(false);
+    try {
+      setLoading(true);
+      setError("");
 
-  const [result, setResult] =
-    useState("");
+      const data = await reviewCode({
+        code,
+        language,
+      });
 
-  const [error, setError] =
-    useState("");
+      setResult(data);
 
-  const handleReview =
-    async () => {
-      if (!code.trim()) {
-        setError(
-          "Please enter code first."
-        );
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError("");
-
-        const data =
-          await reviewCode({
-            code,
-            language,
-          });
-
-        setResult(data.result);
-
-      } catch (err) {
-        setError(
-          err.response?.data
-            ?.message ||
-            "Review failed"
-        );
-
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      setError("Review failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="tool-page">
-      <h1>
-        AI Code Reviewer
-      </h1>
-
-      <p>
-        Paste your code below
-        and get instant AI
-        feedback.
-      </p>
+      <h1>AI Code Reviewer</h1>
 
       <select
         value={language}
-        onChange={(e) =>
-          setLanguage(
-            e.target.value
-          )
-        }
+        onChange={(e) => setLanguage(e.target.value)}
       >
-        <option value="javascript">
-          JavaScript
-        </option>
-
-        <option value="python">
-          Python
-        </option>
-
-        <option value="java">
-          Java
-        </option>
-
-        <option value="cpp">
-          C++
-        </option>
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
       </select>
 
       <textarea
-        rows="15"
-        placeholder="Paste your code here..."
+        rows="12"
         value={code}
-        onChange={(e) =>
-          setCode(
-            e.target.value
-          )
-        }
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="Paste your code..."
       />
 
-      <button
-        onClick={
-          handleReview
-        }
-      >
-        {loading
-          ? "Reviewing..."
-          : "Analyze Code"}
+      <button onClick={handleReview}>
+        {loading ? "Analyzing..." : "Analyze"}
       </button>
 
-      {error && (
-        <div className="error-box">
-          {error}
-        </div>
-      )}
+      {error && <p className="error">{error}</p>}
 
-      {result && (
-        <div className="output-box">
-          <h2>
-            Review Result
-          </h2>
-
-          <pre>
-            {result && (
-  <ReviewResult
-    result={result}
-  />
-)}
-          </pre>
-        </div>
-      )}
+      {result && <ReviewResult result={result} />}
     </div>
   );
 }

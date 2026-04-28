@@ -2,96 +2,109 @@
 
 import { useState } from "react";
 import { reviewGithubRepo } from "@/services/githubService";
-
 import "@/styles/dashboard.css";
 
 export default function GithubReviewPage() {
   const [repoUrl, setRepoUrl] = useState("");
-  const [review, setReview] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleReview = async () => {
+    if (!repoUrl.includes("github.com")) {
+      alert("Enter valid GitHub URL");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const res = await reviewGithubRepo(repoUrl);
+      const data = await reviewGithubRepo(repoUrl);
 
-      console.log("REVIEW:", res);
+      setResult(data);
 
-      setReview(res);
-    } catch (err) {
-      console.log(err);
-      alert("Failed to analyze repo");
+    } catch {
+      alert("Failed to fetch review");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="github-page">
+    <div className="tool-page">
       <h1>GitHub Repo Review</h1>
 
       <input
         type="text"
-        placeholder="https://github.com/username/repo"
+        placeholder="https://github.com/user/repo"
         value={repoUrl}
         onChange={(e) => setRepoUrl(e.target.value)}
       />
 
       <button onClick={handleReview}>
-        {loading ? "Analyzing..." : "Analyze Repo"}
+        {loading ? "Analyzing..." : "Analyze"}
       </button>
 
-      {/* RESULT UI */}
-      {review && (
+      {result && (
         <div className="review-grid">
 
           <div className="review-card">
             <h3>📌 Summary</h3>
-            <p>{review.summary}</p>
+            <p>{result.summary}</p>
           </div>
-           <div className="review-card">
-            <h3>Health Scoree</h3>
-            <p>{review.healthScore}</p>
+
+          <div className="review-card">
+            <h3>⭐ Score</h3>
+            <p>{result.healthScore}/10</p>
           </div>
 
           <div className="review-card">
             <h3>⚡ Code Quality</h3>
-            <p>{review.codeQuality}</p>
+            <p>{result.codeQuality}</p>
           </div>
 
           <div className="review-card">
             <h3>🏗 Architecture</h3>
-            <p>{review.architecture}</p>
+            <p>{result.architecture}</p>
           </div>
 
           <div className="review-card">
             <h3>🔒 Security</h3>
-            <p>{review.security}</p>
-          </div>
- <div className="review-card">
-            <h3>Documentation</h3>
-            <p>{review.documentation}</p>
+            <p>{result.security}</p>
           </div>
 
-           <div className="review-card">
-            <h3>Maintainability</h3>
-            <p>{review.maintainability}</p>
+          <div className="review-card">
+            <h3>📄 Documentation</h3>
+            <p>{result.documentation}</p>
           </div>
-           <div className="review-card">
-            <h3>Weaknesses</h3>
-            <p>{review.weaknesses}</p>
+
+          <div className="review-card">
+            <h3>🧩 Maintainability</h3>
+            <p>{result.maintainability}</p>
           </div>
-           <div className="review-card">
-            <h3>Strengths</h3>
-            <p>{review.strengths}</p>
+
+          <div className="review-card">
+            <h3>👍 Strengths</h3>
+            <ul>
+              {(result.strengths || []).map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ul>
           </div>
+
+          <div className="review-card">
+            <h3>👎 Weaknesses</h3>
+            <ul>
+              {(result.weaknesses || []).map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          </div>
+
           <div className="review-card full-width">
             <h3>🚀 Suggestions</h3>
-
             <ul>
-              {(review?.suggestions || []).map((item, i) => (
-                <li key={i}>{item}</li>
+              {(result.suggestions || []).map((s, i) => (
+                <li key={i}>{s}</li>
               ))}
             </ul>
           </div>
