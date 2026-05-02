@@ -14,10 +14,6 @@ export default function UsersPage() {
   const [users, setUsers] =
     useState([]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const fetchUsers =
     async () => {
       try {
@@ -30,6 +26,12 @@ export default function UsersPage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchUsers
+    );
+  }, []);
 
   const handleDelete =
     async (id) => {

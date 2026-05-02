@@ -15,10 +15,6 @@ export default function BillingPage() {
   const [billing, setBilling] =
     useState(null);
 
-  useEffect(() => {
-    fetchBilling();
-  }, []);
-
   const fetchBilling =
     async () => {
       try {
@@ -31,6 +27,12 @@ export default function BillingPage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchBilling
+    );
+  }, []);
 
   if (!billing)
     return (

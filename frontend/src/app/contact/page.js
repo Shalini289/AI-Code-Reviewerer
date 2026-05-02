@@ -60,7 +60,7 @@ export default function ContactPage() {
         <p>
           Have questions,
           feedback, or need
-          support? We'd love
+          support? We&apos;d love
           to hear from you.
         </p>
       </section>

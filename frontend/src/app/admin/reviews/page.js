@@ -14,10 +14,6 @@ export default function ReviewsPage() {
   const [reviews, setReviews] =
     useState([]);
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
   const fetchReviews =
     async () => {
       try {
@@ -30,6 +26,12 @@ export default function ReviewsPage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchReviews
+    );
+  }, []);
 
   const handleDelete =
     async (id) => {

@@ -16,10 +16,6 @@ export default function History() {
   const [reviews, setReviews] =
     useState([]);
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
 const fetchHistory = async () => {
   try {
     console.log("Fetching History...");
@@ -35,6 +31,12 @@ const fetchHistory = async () => {
     );
   }
 };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchHistory
+    );
+  }, []);
 
   const handleDelete =
     async (id) => {

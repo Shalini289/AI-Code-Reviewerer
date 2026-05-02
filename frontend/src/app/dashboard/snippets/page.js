@@ -25,10 +25,6 @@ export default function SnippetsPage() {
         "javascript",
     });
 
-  useEffect(() => {
-    fetchSnippets();
-  }, []);
-
   const fetchSnippets =
     async () => {
       const data =
@@ -36,6 +32,12 @@ export default function SnippetsPage() {
 
       setSnippets(data);
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchSnippets
+    );
+  }, []);
 
   const handleCreate =
     async () => {

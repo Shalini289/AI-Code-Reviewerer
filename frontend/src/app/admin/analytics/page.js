@@ -13,10 +13,6 @@ export default function AnalyticsPage() {
   const [stats, setStats] =
     useState(null);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const fetchStats =
     async () => {
       try {
@@ -29,6 +25,12 @@ export default function AnalyticsPage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchStats
+    );
+  }, []);
 
   if (!stats)
     return (

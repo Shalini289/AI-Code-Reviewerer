@@ -15,10 +15,6 @@ export default function ProfilePage() {
   const [profile, setProfile] =
     useState(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   const fetchProfile =
     async () => {
       try {
@@ -31,6 +27,12 @@ export default function ProfilePage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchProfile
+    );
+  }, []);
 
   if (!profile)
     return (

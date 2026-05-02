@@ -25,7 +25,7 @@ export default function ProtectedRoute({
         "/login"
       );
     }
-  }, []);
+  }, [router]);
 
   return children;
 }

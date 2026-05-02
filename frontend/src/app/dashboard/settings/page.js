@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getProfile, updateProfile, changePassword } from "@/services/userService";
 import "@/styles/dashboard.css";
 
@@ -30,21 +30,23 @@ export default function SettingsPage() {
   const [nameErr, setNameErr]         = useState("");
   const [oldPwErr, setOldPwErr]       = useState("");
 
-  useEffect(() => { fetchProfile(); }, []);
+  const notify = useCallback((type, msg) => {
+    setBanner({ type, msg });
+    setTimeout(() => setBanner(null), 3500);
+  }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const data = await getProfile();
       setUser(data); setName(data.name);
     } catch {
       notify("error", "Failed to load profile.");
     }
-  };
+  }, [notify]);
 
-  const notify = (type, msg) => {
-    setBanner({ type, msg });
-    setTimeout(() => setBanner(null), 3500);
-  };
+  useEffect(() => {
+    void Promise.resolve().then(fetchProfile);
+  }, [fetchProfile]);
 
   const ruleResults = RULES.map(r => ({ ...r, pass: r.test(newPw, oldPw) }));
   const score = ruleResults.filter(r => r.pass).length;
@@ -86,7 +88,7 @@ export default function SettingsPage() {
 
       {banner && <div className={`banner ${banner.type}`}>{banner.msg}</div>}
 
-      <div className="review-card">
+      <div className="card">
         <div className="card-header">
           <div className="avatar">{name.slice(0,2).toUpperCase()}</div>
           <div>

@@ -15,10 +15,6 @@ export default function DashboardPage() {
   const [data, setData] =
     useState(null);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
   const fetchDashboard =
     async () => {
       try {
@@ -31,6 +27,12 @@ export default function DashboardPage() {
         console.log(err);
       }
     };
+
+  useEffect(() => {
+    void Promise.resolve().then(
+      fetchDashboard
+    );
+  }, []);
 
   if (!data)
     return (
