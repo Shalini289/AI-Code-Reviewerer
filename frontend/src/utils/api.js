@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL:  "https://ai-code-reviewerer.onrender.com",
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://ai-code-reviewerer.onrender.com",
 });
 
 api.interceptors.request.use(

@@ -60,6 +60,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "AI Code Reviewer API",
+    frontend: "http://localhost:3000",
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/review", reviewRoutes);
 app.use(
