@@ -1,6 +1,6 @@
 services:
   backend:
-    build: ./backend
+    image: Shalini95/mern-backend:latest
     ports:
       - "5001:5000"
     depends_on:
@@ -9,7 +9,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/mydb
 
   frontend:
-    build: ./frontend
+      image: Shalini95/mern-frontend:latest
     ports:
       - "3000:3000"
     depends_on:
