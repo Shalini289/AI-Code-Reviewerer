@@ -45,7 +45,11 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    user.password = newPassword; // will auto-hash
+    user.password =
+      await bcrypt.hash(
+        newPassword,
+        10
+      );
     await user.save();
 
     res.json({

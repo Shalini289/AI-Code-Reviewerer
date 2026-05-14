@@ -18,13 +18,20 @@ module.exports = (
     });
   }
 
-  const decoded =
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+  try {
+    const decoded =
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
 
-  req.user = decoded;
+    req.user = decoded;
 
-  next();
+    next();
+  } catch {
+    return res.status(401).json({
+      message:
+        "Invalid or expired token",
+    });
+  }
 };

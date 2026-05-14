@@ -228,7 +228,10 @@ Reset Password
       }
 
       user.password =
-        req.body.password;
+        await bcrypt.hash(
+          req.body.password,
+          10
+        );
 
       user.resetPasswordToken =
         undefined;

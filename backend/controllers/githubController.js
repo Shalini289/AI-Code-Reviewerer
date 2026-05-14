@@ -63,7 +63,17 @@ Analyze the repository using the provided metadata and return ONLY valid JSON in
   "maintainability": "",
   "strengths": [],
   "weaknesses": [],
-  "suggestions": []
+  "suggestions": [],
+  "githubAutomation": {
+    "pullRequestReview": ["automatic pull request review rule"],
+    "commitComments": ["commit comment that would be useful"],
+    "qualityTrends": ["metric to track across commits or releases"]
+  },
+  "cicdIntegration": {
+    "deploymentReview": ["auto-review step during deployment"],
+    "pushBlockers": ["security or quality issue that should block a push"],
+    "pipelineSteps": ["CI/CD workflow step to add"]
+  }
 }
 
 Rules:
@@ -82,6 +92,10 @@ Evaluate based on:
 - Maintainability and scalability
 - Security risks (general patterns)
 - Documentation quality
+- Pull request review automation opportunities
+- Commit comment suggestions
+- Code quality trends to track
+- CI/CD deployment review and insecure push blockers
 
 Repository Info:
 Name: ${data.name}
@@ -95,6 +109,12 @@ Open Issues: ${data.open_issues_count}
     // ✅ 5. Call Groq AI
     let aiResponse;
     try {
+      if (!process.env.GROQ_API_KEY) {
+        return res.status(500).json({
+          message: "AI service is not configured",
+        });
+      }
+
       aiResponse = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
@@ -125,8 +145,17 @@ Open Issues: ${data.open_issues_count}
       });
     }
 
-    const aiText =
+    let aiText =
       aiResponse.data?.choices?.[0]?.message?.content || "";
+
+    aiText = aiText.replace(/```json|```/g, "").trim();
+
+    const start = aiText.indexOf("{");
+    const end = aiText.lastIndexOf("}");
+
+    if (start !== -1 && end !== -1) {
+      aiText = aiText.substring(start, end + 1);
+    }
 
     // ✅ 6. Safe JSON parsing
     let parsed;
@@ -145,6 +174,16 @@ Open Issues: ${data.open_issues_count}
         strengths: [],
         weaknesses: [],
         suggestions: [],
+        githubAutomation: {
+          pullRequestReview: [],
+          commitComments: [],
+          qualityTrends: [],
+        },
+        cicdIntegration: {
+          deploymentReview: [],
+          pushBlockers: [],
+          pipelineSteps: [],
+        },
       };
     }
 

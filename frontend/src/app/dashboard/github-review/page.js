@@ -4,10 +4,36 @@ import { useState } from "react";
 import { reviewGithubRepo } from "@/services/githubService";
 import "@/styles/dashboard.css";
 
+function List({ items }) {
+  const list = Array.isArray(items) ? items.filter(Boolean) : [];
+
+  if (!list.length) return <p>No items found.</p>;
+
+  return (
+    <ul>
+      {list.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function Card({ title, children, fullWidth = false }) {
+  return (
+    <div className={`review-card ${fullWidth ? "full-width" : ""}`}>
+      <h3>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
 export default function GithubReviewPage() {
   const [repoUrl, setRepoUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const automation = result?.githubAutomation || {};
+  const cicd = result?.cicdIntegration || {};
 
   const handleReview = async () => {
     if (!repoUrl.includes("github.com")) {
@@ -21,7 +47,6 @@ export default function GithubReviewPage() {
       const data = await reviewGithubRepo(repoUrl);
 
       setResult(data);
-
     } catch {
       alert("Failed to fetch review");
     } finally {
@@ -46,69 +71,69 @@ export default function GithubReviewPage() {
 
       {result && (
         <div className="review-grid">
-
-          <div className="review-card">
-            <h3>📌 Summary</h3>
+          <Card title="Summary">
             <p>{result.summary}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>⭐ Score</h3>
+          <Card title="Score">
             <p>{result.healthScore}/10</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>⚡ Code Quality</h3>
+          <Card title="Code Quality">
             <p>{result.codeQuality}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>🏗 Architecture</h3>
+          <Card title="Architecture">
             <p>{result.architecture}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>🔒 Security</h3>
+          <Card title="Security">
             <p>{result.security}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>📄 Documentation</h3>
+          <Card title="Documentation">
             <p>{result.documentation}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>🧩 Maintainability</h3>
+          <Card title="Maintainability">
             <p>{result.maintainability}</p>
-          </div>
+          </Card>
 
-          <div className="review-card">
-            <h3>👍 Strengths</h3>
-            <ul>
-              {(result.strengths || []).map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ul>
-          </div>
+          <Card title="Strengths">
+            <List items={result.strengths} />
+          </Card>
 
-          <div className="review-card">
-            <h3>👎 Weaknesses</h3>
-            <ul>
-              {(result.weaknesses || []).map((w, i) => (
-                <li key={i}>{w}</li>
-              ))}
-            </ul>
-          </div>
+          <Card title="Weaknesses">
+            <List items={result.weaknesses} />
+          </Card>
 
-          <div className="review-card full-width">
-            <h3>🚀 Suggestions</h3>
-            <ul>
-              {(result.suggestions || []).map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ul>
-          </div>
+          <Card title="Suggestions" fullWidth>
+            <List items={result.suggestions} />
+          </Card>
 
+          <Card title="Pull Request Automation">
+            <List items={automation.pullRequestReview} />
+          </Card>
+
+          <Card title="Commit Comments">
+            <List items={automation.commitComments} />
+          </Card>
+
+          <Card title="Quality Trends">
+            <List items={automation.qualityTrends} />
+          </Card>
+
+          <Card title="Deployment Review">
+            <List items={cicd.deploymentReview} />
+          </Card>
+
+          <Card title="Push Blockers">
+            <List items={cicd.pushBlockers} />
+          </Card>
+
+          <Card title="CI/CD Pipeline Steps" fullWidth>
+            <List items={cicd.pipelineSteps} />
+          </Card>
         </div>
       )}
     </div>

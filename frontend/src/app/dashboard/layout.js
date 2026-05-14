@@ -47,6 +47,30 @@ export default function DashboardLayout({
             <Link href="/dashboard/github-review">
   GitHub Review
 </Link>
+<Link href="/dashboard/intelligence">
+  Intelligence
+</Link>
+<Link href="/dashboard/security-lab">
+  Security Lab
+</Link>
+<Link href="/dashboard/refactor-lab">
+  Refactor Lab
+</Link>
+<Link href="/dashboard/performance-lab">
+  Performance
+</Link>
+<Link href="/dashboard/devops">
+  DevOps
+</Link>
+<Link href="/dashboard/automation">
+  Automation
+</Link>
+<Link href="/dashboard/learning">
+  Learning
+</Link>
+<Link href="/dashboard/collaboration">
+  Collaboration
+</Link>
 <Link href="/dashboard/compare">
   Compare
 </Link>
