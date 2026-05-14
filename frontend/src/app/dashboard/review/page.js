@@ -202,106 +202,115 @@ export default function ReviewPage() {
 
   return (
     <div className={`tool-page premium-review ${ideTheme === "vs" ? "light-ide" : ""}`}>
-      <h1>AI Code Reviewer</h1>
-
-      <div className="premium-toolbar">
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          {LANGUAGE_OPTIONS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={ideTheme}
-          onChange={(e) => setIdeTheme(e.target.value)}
-        >
-          <option value="vs-dark">Dark IDE</option>
-          <option value="vs">Light IDE</option>
-        </select>
-      </div>
-
-      <div className="editor-shell">
-        <MonacoEditor
-          height="420px"
-          language={monacoLanguage}
-          theme={ideTheme}
-          value={code}
-          onChange={(value) => setCode(value || "")}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            wordWrap: "on",
-            automaticLayout: true,
-          }}
-        />
-      </div>
-
-      <textarea
-        rows="3"
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        placeholder='Ask the AI pair programmer: "What should I build next?", "Can this be optimized?", or "Find vulnerabilities"'
-      />
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleScreenshotUpload}
-      />
-
-      {screenshot && (
-        <p className="upload-note">Uploaded screenshot: {screenshot.name}</p>
-      )}
-
-      <div className="premium-actions">
-        <button onClick={() => runReview("analyze")}>
-          {loading ? "Analyzing..." : "Analyze"}
-        </button>
-        <button onClick={handleApplyFixedCode} disabled={loading}>
-          Fix Entire File
-        </button>
-        <button onClick={handleApplyOptimizedCode} disabled={loading}>
-          One-click Optimize
-        </button>
-        <button onClick={handleRunSandbox} disabled={loading}>
-          Run JS Sandbox
-        </button>
-      </div>
-
-      <div className="premium-panels">
-        <div className="premium-panel">
-          <h3>Collaborative Review</h3>
-          <p>Session {sessionId}</p>
-          <button className="secondary-action" onClick={copySessionLink}>
-            Copy session link
-          </button>
+      <div className="review-header">
+        <div>
+          <h1>AI Code Reviewer</h1>
+          <p>Review, fix, optimize, execute, and score code in one workspace.</p>
         </div>
+      </div>
 
-        <div className="premium-panel">
-          <h3>Live Execution Sandbox</h3>
-          <pre>{sandboxOutput || "Run JavaScript to see console output here."}</pre>
-        </div>
-
-        <div className="premium-panel">
-          <h3>Developer Leaderboard</h3>
-          {leaderboard.length ? (
-            <ol>
-              {leaderboard.map((entry) => (
-                <li key={entry.id}>
-                  <span>{entry.label}</span>
-                  <strong>{entry.score}/100</strong>
-                </li>
+      <div className="review-workspace">
+        <section className="review-primary">
+          <div className="premium-toolbar">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {LANGUAGE_OPTIONS.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
               ))}
-            </ol>
-          ) : (
-            <p>No scores yet.</p>
+            </select>
+
+            <select
+              value={ideTheme}
+              onChange={(e) => setIdeTheme(e.target.value)}
+            >
+              <option value="vs-dark">Dark IDE</option>
+              <option value="vs">Light IDE</option>
+            </select>
+          </div>
+
+          <div className="editor-shell">
+            <MonacoEditor
+              height="560px"
+              language={monacoLanguage}
+              theme={ideTheme}
+              value={code}
+              onChange={(value) => setCode(value || "")}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                wordWrap: "on",
+                automaticLayout: true,
+              }}
+            />
+          </div>
+
+          <textarea
+            rows="3"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder='Ask the AI pair programmer: "What should I build next?", "Can this be optimized?", or "Find vulnerabilities"'
+          />
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleScreenshotUpload}
+          />
+
+          {screenshot && (
+            <p className="upload-note">Uploaded screenshot: {screenshot.name}</p>
           )}
-        </div>
+
+          <div className="premium-actions">
+            <button onClick={() => runReview("analyze")}>
+              {loading ? "Analyzing..." : "Analyze"}
+            </button>
+            <button onClick={handleApplyFixedCode} disabled={loading}>
+              Fix Entire File
+            </button>
+            <button onClick={handleApplyOptimizedCode} disabled={loading}>
+              One-click Optimize
+            </button>
+            <button onClick={handleRunSandbox} disabled={loading}>
+              Run JS Sandbox
+            </button>
+          </div>
+        </section>
+
+        <aside className="review-side">
+          <div className="premium-panel">
+            <h3>Collaborative Review</h3>
+            <p>Session {sessionId}</p>
+            <button className="secondary-action" onClick={copySessionLink}>
+              Copy session link
+            </button>
+          </div>
+
+          <div className="premium-panel">
+            <h3>Live Execution Sandbox</h3>
+            <pre>{sandboxOutput || "Run JavaScript to see console output here."}</pre>
+          </div>
+
+          <div className="premium-panel">
+            <h3>Developer Leaderboard</h3>
+            {leaderboard.length ? (
+              <ol>
+                {leaderboard.map((entry) => (
+                  <li key={entry.id}>
+                    <span>{entry.label}</span>
+                    <strong>{entry.score}/100</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p>No scores yet.</p>
+            )}
+          </div>
+        </aside>
       </div>
 
       {error && <p className="error">{error}</p>}

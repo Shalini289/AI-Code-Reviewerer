@@ -56,9 +56,19 @@ exports.reviewCode = async (req, res) => {
       },
     };
 
-    const systemPrompt = `You are a code review API. You MUST respond with ONLY a raw JSON object.
-No markdown. No explanation. No backticks. No text before or after.
-If you deviate from JSON format, the response will be rejected.
+    const systemPrompt = `You are a deterministic senior code review API.
+Return ONLY one raw JSON object. Do not return markdown, prose, comments, code fences, or text outside JSON.
+Use the exact keys and value types from the schema. Use [] for no findings, "" for unavailable text, false for unavailable booleans, and 0 for unavailable scores.
+Base findings only on the submitted code, screenshot metadata, user question, and dependency manifest context. Do not invent files, frameworks, packages, routes, secrets, tests, PRs, metrics, or runtime behavior.
+Be specific: mention concrete functions, variables, code patterns, or dependency names when possible.
+Be concise: array items should be actionable and usually under 22 words.
+Classify severity by production impact, exploitability, data loss risk, resource exhaustion risk, and user-visible breakage.
+If the evidence is uncertain, phrase the item as a risk to verify instead of a confirmed bug.
+Every finding string should follow this format when possible: "[Severity] Evidence -> Impact -> Fix".
+Examples:
+- "[Critical] setInterval without cleanup -> memory leak in long sessions -> clear timer on unmount"
+- "[High] req.body merged into Mongo filter -> NoSQL injection risk -> whitelist allowed query fields"
+- "[Low] variable x is vague -> slower maintenance -> rename to activeUserCount"
 
 Always use exactly this structure:
 {
@@ -450,7 +460,43 @@ Always use exactly this structure:
   }
 }`;
 
-const userPrompt = `Review this ${language} code and return the JSON object.
+const userPrompt = `Task: Review the submitted ${language || "unknown"} code and return the JSON object matching the schema exactly.
+
+Review priorities:
+1. Correctness and runtime failures.
+2. Security vulnerabilities and secret exposure.
+3. Production-breaking, scalability, and deployment risks.
+4. Performance and complexity.
+5. Maintainability, readability, standards, and learning guidance.
+6. Optional/premium outputs requested by mode.
+
+Precision rules:
+- Do not list a category unless there is direct code evidence or a clear dependency-context risk.
+- Every critical/high issue must include the concrete cause in rootCauseAnalysis and autoPriorityFixing.
+- Use Big-O notation only when it can be inferred from the code.
+- Scores must be integers from 0 to 100.
+- Score correctness, security, performance, and readability independently before setting overall.
+- Overall score must be the rounded average adjusted down for any Critical or High issue.
+- Difficulty level must be one of Beginner, Intermediate, Advanced, or FAANG-level.
+- For screenshot-only input, do not pretend OCR happened; set screenshotReview.status to needs_ocr.
+- For fixedCode or optimizedCode, return complete corrected code, not a diff or explanation.
+- For Mermaid diagrams, return only Mermaid syntax in the diagram field.
+- lineByLineExplanation should explain important lines or blocks only, not every blank/comment line.
+- testCases.unitTests must include named test intent plus input and expected output when inferable.
+- aiSuggestions.renameSuggestions must include old name -> new name -> reason.
+- dependencyAnalysis must reference package names from the manifest context only.
+- dockerKubernetesReview must stay empty unless Docker/Kubernetes/config code is submitted.
+- queryOptimization must stay empty unless SQL, MongoDB, Redis, ORM, or query code is submitted.
+- quantumInspiredAnalysis must be practical: if quantum is not useful, explain why classical is better.
+- Do not fill premium fixedCode/optimizedCode with the original code unless no change is needed; then explain in changes.
+
+Severity rubric:
+- Critical: production crash, data loss, credential exposure, auth bypass, exploitable injection, unbounded resource leak.
+- High: likely functional breakage, serious security flaw, race condition, unsafe deploy blocker, major scalability limit.
+- Medium: edge-case bug, inefficient algorithm, incomplete validation, maintainability risk with moderate impact.
+- Low: naming, formatting, minor duplication, small readability or convention issue.
+- Informational: explanation, learning note, optional idea, or observation with no required fix.
+
 Check for:
 - Bug detection: null pointer issues, infinite loops, memory leaks, race conditions, logic mistakes.
 - Code quality: bad practices, cleaner code, redundancy, readability.
@@ -484,7 +530,11 @@ Screenshot upload: ${screenshotName || "No screenshot uploaded."}
 Screenshot data present: ${screenshotDataUrl ? "Yes. If the code text is not included below, set screenshotReview.status to needs_ocr and ask for OCR text or a vision/OCR integration." : "No."}
 Project dependency manifest context:
 ${JSON.stringify(dependencyContext, null, 2)}
-\n\`\`\`\n${code}\n\`\`\``;
+
+Submitted code:
+<<<CODE
+${code || ""}
+CODE`;
 
    const aiRes = await axios.post(
   "https://api.groq.com/openai/v1/chat/completions",

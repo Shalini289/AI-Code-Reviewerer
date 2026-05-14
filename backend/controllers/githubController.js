@@ -46,6 +46,11 @@ exports.reviewGithubRepo = async (req, res) => {
     }
 
     const data = repoData.data;
+    const systemPrompt = `You are a deterministic GitHub repository review API.
+Return ONLY one raw JSON object. Do not return markdown, prose, comments, code fences, or text outside JSON.
+Use the exact schema keys and value types. Use [] for no items.
+Use only the provided repository metadata. Do not pretend you inspected source files, package manifests, workflows, or commits unless that data is included.
+Make recommendations practical and clearly label metadata-based uncertainty.`;
 
     // ✅ 4. Prepare prompt for AI
     const prompt = `
@@ -115,19 +120,80 @@ Open Issues: ${data.open_issues_count}
         });
       }
 
+      const precisePrompt = `Task: Review this GitHub repository using metadata only.
+
+Return this exact JSON schema:
+{
+  "summary": "",
+  "healthScore": 0,
+  "codeQuality": "",
+  "architecture": "",
+  "security": "",
+  "documentation": "",
+  "maintainability": "",
+  "strengths": [],
+  "weaknesses": [],
+  "suggestions": [],
+  "githubAutomation": {
+    "pullRequestReview": ["automatic pull request review rule"],
+    "commitComments": ["commit comment that would be useful"],
+    "qualityTrends": ["metric to track across commits or releases"]
+  },
+  "cicdIntegration": {
+    "deploymentReview": ["auto-review step during deployment"],
+    "pushBlockers": ["security or quality issue that should block a push"],
+    "pipelineSteps": ["CI/CD workflow step to add"]
+  }
+}
+
+Scoring rubric:
+- 9-10: healthy public metadata, clear description, active adoption, low visible risk.
+- 7-8: mostly healthy with minor documentation, maintenance, or automation gaps.
+- 5-6: moderate risk due to sparse metadata, open issues, weak description, or unclear maintenance.
+- 3-4: high risk signals from metadata.
+- 1-2: severe metadata risk or likely abandoned/incomplete repo.
+
+Rules:
+- healthScore must be an integer from 1 to 10.
+- Keep each string concise and practical.
+- Do not claim code-level vulnerabilities from metadata alone.
+- If a recommendation depends on unseen source code, phrase it as "Verify..." or "Add a check for...".
+- Arrays must contain short bullet-like strings.
+- Each weakness must use this format: "Signal -> risk -> recommended check".
+- Each suggestion must use this format: "Action -> expected benefit".
+- codeQuality, architecture, security, documentation, and maintainability must each mention the metadata signal used.
+- githubAutomation.pullRequestReview must be enforceable as a PR rule or checklist item.
+- cicdIntegration.pipelineSteps must name a concrete CI step, such as lint, test, dependency audit, secret scan, or build.
+- cicdIntegration.pushBlockers must list only issues that should actually block merge/deploy.
+
+Repository metadata:
+{
+  "name": ${JSON.stringify(data.name)},
+  "description": ${JSON.stringify(data.description || "")},
+  "primaryLanguage": ${JSON.stringify(data.language || "")},
+  "stars": ${data.stargazers_count},
+  "forks": ${data.forks_count},
+  "openIssues": ${data.open_issues_count},
+  "visibility": ${JSON.stringify(data.visibility || "")},
+  "defaultBranch": ${JSON.stringify(data.default_branch || "")},
+  "createdAt": ${JSON.stringify(data.created_at || "")},
+  "updatedAt": ${JSON.stringify(data.updated_at || "")},
+  "pushedAt": ${JSON.stringify(data.pushed_at || "")}
+}`;
+
       aiResponse = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
           model: "llama-3.1-8b-instant",
+          temperature: 0.1,
           messages: [
             {
               role: "system",
-              content:
-                "You are a senior software engineer. Always return valid JSON only.",
+              content: systemPrompt,
             },
             {
               role: "user",
-              content: prompt,
+              content: precisePrompt,
             },
           ],
         },

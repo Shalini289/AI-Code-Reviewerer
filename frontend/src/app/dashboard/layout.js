@@ -1,16 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 import "@/styles/dashboard.css";
 
+const navSections = [
+  {
+    title: "Review",
+    links: [
+      { href: "/dashboard", label: "Overview" },
+      { href: "/dashboard/review", label: "AI Reviewer" },
+      { href: "/dashboard/github-review", label: "GitHub Review" },
+      { href: "/dashboard/compare", label: "Compare" },
+      { href: "/dashboard/security", label: "Security" },
+    ],
+  },
+  {
+    title: "Labs",
+    links: [
+      { href: "/dashboard/intelligence", label: "Intelligence" },
+      { href: "/dashboard/security-lab", label: "Security Lab" },
+      { href: "/dashboard/refactor-lab", label: "Refactor Lab" },
+      { href: "/dashboard/performance-lab", label: "Performance" },
+      { href: "/dashboard/devops", label: "DevOps" },
+      { href: "/dashboard/automation", label: "Automation" },
+      { href: "/dashboard/learning", label: "Learning" },
+      { href: "/dashboard/collaboration", label: "Collaboration" },
+    ],
+  },
+  {
+    title: "Workspace",
+    links: [
+      { href: "/dashboard/history", label: "History" },
+      { href: "/dashboard/snippets", label: "Snippets" },
+      { href: "/dashboard/billing", label: "Billing" },
+      { href: "/dashboard/profile", label: "Profile" },
+      { href: "/dashboard/settings", label: "Settings" },
+    ],
+  },
+];
+
 export default function DashboardLayout({
   children,
 }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = () => {
     localStorage.removeItem(
@@ -27,71 +64,38 @@ export default function DashboardLayout({
   return (
     <ProtectedRoute>
       <div className="dashboard-layout">
-
-        {/* Sidebar */}
         <aside className="sidebar">
-          <h2>
-            AI Reviewer
-          </h2>
+          <div className="sidebar-brand">
+            <span>AI</span>
+            <div>
+              <h2>AI Reviewer</h2>
+              <p>Code quality studio</p>
+            </div>
+          </div>
 
-          <nav>
-            <Link href="/dashboard">
-              Dashboard
-            </Link>
+          <nav aria-label="Dashboard navigation">
+            {navSections.map((section) => (
+              <div className="nav-section" key={section.title}>
+                <p>{section.title}</p>
 
+                {section.links.map((link) => {
+                  const isActive =
+                    link.href === "/dashboard"
+                      ? pathname === link.href
+                      : pathname.startsWith(link.href);
 
-
-            <Link href="/dashboard/review">
-              Review
-            </Link>
-            <Link href="/dashboard/github-review">
-  GitHub Review
-</Link>
-<Link href="/dashboard/intelligence">
-  Intelligence
-</Link>
-<Link href="/dashboard/security-lab">
-  Security Lab
-</Link>
-<Link href="/dashboard/refactor-lab">
-  Refactor Lab
-</Link>
-<Link href="/dashboard/performance-lab">
-  Performance
-</Link>
-<Link href="/dashboard/devops">
-  DevOps
-</Link>
-<Link href="/dashboard/automation">
-  Automation
-</Link>
-<Link href="/dashboard/learning">
-  Learning
-</Link>
-<Link href="/dashboard/collaboration">
-  Collaboration
-</Link>
-<Link href="/dashboard/compare">
-  Compare
-</Link>
-            <Link href="/dashboard/history">
-              History
-            </Link>
-            <Link href="/dashboard/security">
-  Security
-</Link>
-<Link href="/dashboard/snippets">
-  Snippets
-</Link>
-<Link href="/dashboard/billing">
-  Billing
-</Link>
-<Link href="/dashboard/profile">
-  Profile
-</Link>
-            <Link href="/dashboard/settings">
-              Settings
-            </Link>
+                  return (
+                    <Link
+                      className={isActive ? "active" : ""}
+                      href={link.href}
+                      key={link.href}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
 
           <button
@@ -104,11 +108,9 @@ export default function DashboardLayout({
           </button>
         </aside>
 
-        {/* Content */}
         <main className="dashboard-main">
           {children}
         </main>
-
       </div>
     </ProtectedRoute>
   );

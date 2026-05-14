@@ -8,9 +8,16 @@ exports.scanSecurity = async (req, res) => {
       return res.status(400).json({ message: "Code is required" });
     }
 
-    const systemPrompt = `You are a security analysis API. You MUST respond with ONLY a raw JSON object.
-No markdown. No explanation. No backticks. No text before or after.
-If you deviate from JSON format, the response will be rejected.
+    const systemPrompt = `You are a deterministic secure-code review API.
+Return ONLY one raw JSON object. Do not return markdown, prose, comments, code fences, or text outside JSON.
+Use the exact keys and value types from the schema. Use [] for no findings and "" for unavailable text.
+Base every vulnerability on evidence visible in the submitted code. Do not invent packages, files, secrets, endpoints, or runtime behavior.
+Prefer specific, actionable findings over generic advice.
+Every vulnerability must follow this evidence standard:
+- issue: short technical name, for example "NoSQL injection in login filter"
+- description: include exact risky pattern and attacker impact
+- fix: include the concrete safer pattern, library method, validation, or config change
+- severity: choose the highest justified level, never exaggerate without exploit evidence
 
 Always use exactly this structure:
 {
@@ -28,7 +35,37 @@ Always use exactly this structure:
   "secureCodeExample": "corrected code snippet as a string"
 }`;
 
-    const userPrompt = `Review this ${language} code for security vulnerabilities and return the JSON object:\n\`\`\`\n${code}\n\`\`\``;
+    const userPrompt = `Task: Perform a precise security review for the submitted ${language || "unknown"} code.
+
+Severity rubric:
+- Critical: exploitable remote code execution, credential exposure, authentication bypass, data loss, destructive injection, or production-wide compromise.
+- High: likely exploitable injection, broken access control, unsafe auth/session handling, sensitive data exposure, or dangerous file/network operation.
+- Medium: security weakness that needs context to exploit, weak validation, unsafe defaults, missing rate limits, or risky dependency/API use.
+- Low: hardening, defensive coding, or minor misconfiguration.
+
+Check specifically for:
+- SQL/NoSQL/command/path/template injection
+- XSS and unsafe HTML/DOM rendering
+- hardcoded API keys, JWT secrets, passwords, tokens, Firebase configs, AWS credentials
+- weak authentication, authorization, password reset, or session logic
+- insecure crypto, weak hashing, missing salting, predictable randomness
+- SSRF, unsafe redirects, unsafe file upload/read/write
+- prototype pollution, object injection, unsafe deserialization
+- buffer overflow or unsafe memory behavior where language allows it
+
+Rules:
+- If a risk is not present in the code, do not list it.
+- Every vulnerability description must mention the concrete code pattern that caused the finding.
+- secureCodeExample should include a minimal corrected snippet only when a meaningful fix is possible.
+- Do not say "use best practices" unless you name the exact practice.
+- If the code is too small to judge a category, leave it empty instead of guessing.
+- Set riskLevel to the highest vulnerability severity; if no vulnerabilities exist, use "Low".
+- For bestPractices, include only practices directly relevant to the submitted code.
+
+Submitted code:
+<<<CODE
+${code}
+CODE`;
 
     const aiRes = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
