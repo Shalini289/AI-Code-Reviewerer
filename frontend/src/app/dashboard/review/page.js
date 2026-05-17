@@ -102,8 +102,11 @@ export default function ReviewPage() {
       }
 
       return data;
-    } catch {
-      setError("Review failed");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Review failed"
+      );
       return null;
     } finally {
       setLoading(false);

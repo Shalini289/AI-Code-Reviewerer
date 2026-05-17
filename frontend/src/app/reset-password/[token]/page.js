@@ -19,10 +19,12 @@ export default function ResetPassword() {
     useState("");
 
   const handleReset =
-    async () => {
+    async (event) => {
+      event.preventDefault();
+
       try {
         await api.put(
-          `/auth/reset-password/${token}`,
+          `/api/auth/reset-password/${token}`,
           {
             password,
           }
@@ -34,6 +36,10 @@ export default function ResetPassword() {
 
       } catch (err) {
         console.log(err);
+        alert(
+          err.response?.data?.message ||
+          "Password reset failed"
+        );
       }
     };
 

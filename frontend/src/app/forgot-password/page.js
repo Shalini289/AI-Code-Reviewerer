@@ -12,10 +12,12 @@ export default function ForgotPassword() {
     useState("");
 
   const handleSubmit =
-    async () => {
+    async (event) => {
+      event.preventDefault();
+
       try {
         await api.post(
-          "/auth/forgot-password",
+          "/api/auth/forgot-password",
           { email }
         );
 
@@ -25,6 +27,10 @@ export default function ForgotPassword() {
 
       } catch (err) {
         console.log(err);
+        alert(
+          err.response?.data?.message ||
+          "Could not send reset email"
+        );
       }
     };
 

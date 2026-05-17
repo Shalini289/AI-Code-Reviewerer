@@ -163,8 +163,19 @@ exports.forgotPassword =
 
       await user.save();
 
+      const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "http://localhost:3000";
+
       const resetUrl =
-        `http://localhost:3000/reset-password/${resetToken}`;
+        `${frontendUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
+
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        return res.status(500).json({
+          message:
+            "Email service is not configured",
+        });
+      }
 
       const transporter =
         nodemailer.createTransport(
@@ -182,13 +193,16 @@ exports.forgotPassword =
 
       await transporter.sendMail(
         {
+          from:
+            process.env.EMAIL_USER,
           to: user.email,
           subject:
-            "Password Reset",
+            "Reset your AI Code Reviewer password",
           html: `
-<a href="${resetUrl}">
-Reset Password
-</a>
+<p>You requested a password reset for AI Code Reviewer.</p>
+<p>This link expires in 10 minutes.</p>
+<p><a href="${resetUrl}">Reset Password</a></p>
+<p>If you did not request this, you can ignore this email.</p>
 `,
         }
       );

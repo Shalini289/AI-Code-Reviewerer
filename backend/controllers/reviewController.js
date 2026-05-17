@@ -536,18 +536,171 @@ Submitted code:
 ${code || ""}
 CODE`;
 
+const compactSystemPrompt = `You are a deterministic senior code review API.
+Return ONLY a valid raw JSON object. No markdown, no code fences, no prose outside JSON.
+Use evidence from the submitted code only. Do not invent files, libraries, routes, tests, secrets, metrics, or vulnerabilities.
+Use [] for no findings, "" for unavailable text, false for unavailable booleans, and 0 for unavailable scores.
+Every important issue should use this format: "[Severity] Evidence -> Impact -> Fix".
+Severity labels: Critical, High, Medium, Low, Informational.
+Scores must be integers from 0 to 100.
+If a category is not relevant to the submitted code, leave it empty.`;
+
+const compactUserPrompt = `Review this ${language || "unknown"} code.
+
+Requested mode: ${mode || "analyze"}
+User question: ${question || "None"}
+Screenshot file: ${screenshotName || "None"}
+Screenshot data present: ${screenshotDataUrl ? "yes, but no OCR is available unless code text is also provided" : "no"}
+
+Return JSON with this structure. You may omit deeply nested fields only when not relevant, but keep these top-level keys:
+{
+  "summary": "one sentence",
+  "bugs": ["[Severity] Evidence -> Impact -> Fix"],
+  "performance": "specific performance summary",
+  "readability": "specific readability summary",
+  "bestPractices": ["[Severity] Evidence -> Impact -> Fix"],
+  "security": "specific security summary",
+  "improvements": ["[Severity] Evidence -> Impact -> Fix"],
+  "bugDetection": {
+    "nullPointerIssues": [],
+    "infiniteLoops": [],
+    "memoryLeaks": [],
+    "raceConditions": [],
+    "logicMistakes": [],
+    "otherBugs": []
+  },
+  "codeQuality": {
+    "badPractices": [],
+    "cleanerCode": [],
+    "redundancy": [],
+    "readability": []
+  },
+  "complexity": {
+    "timeComplexity": "Big-O with reason if inferable",
+    "spaceComplexity": "Big-O with reason if inferable",
+    "unnecessaryNestedLoops": []
+  },
+  "aiSuggestions": {
+    "refactorFunctions": [],
+    "optimizeAlgorithms": [],
+    "renameSuggestions": ["old name -> new name -> reason"],
+    "modularization": []
+  },
+  "securityScan": {
+    "sqlInjection": [],
+    "xss": [],
+    "hardcodedSecrets": [],
+    "unsafeAuth": [],
+    "bufferOverflow": [],
+    "otherVulnerabilities": []
+  },
+  "smartAI": {
+    "simpleExplanation": "beginner-friendly explanation",
+    "lineByLineExplanation": [{ "line": "line or range", "code": "excerpt", "explanation": "meaning" }],
+    "testCases": {
+      "unitTests": ["test name -> input -> expected output"],
+      "edgeCases": [],
+      "stressTests": []
+    },
+    "codeChat": {
+      "functionPurpose": "",
+      "optimizationAnswer": "",
+      "vulnerabilityAnswer": "",
+      "customQuestionAnswer": ""
+    }
+  },
+  "premiumFeatures": {
+    "codeScore": {
+      "overall": 0,
+      "correctness": 0,
+      "security": 0,
+      "performance": 0,
+      "readability": 0,
+      "summary": ""
+    },
+    "fixEntireFile": {
+      "available": false,
+      "fixedCode": "",
+      "changes": []
+    },
+    "oneClickOptimization": {
+      "available": false,
+      "optimizedCode": "",
+      "changes": []
+    },
+    "leaderboard": {
+      "scoreLabel": "",
+      "improvementPoints": 0
+    }
+  },
+  "intelligentReview": {
+    "severityClassification": {
+      "critical": [],
+      "high": [],
+      "medium": [],
+      "low": [],
+      "informational": []
+    },
+    "autoPriorityFixing": {
+      "fixFirst": [],
+      "productionBreakers": [],
+      "scalabilityRisks": [],
+      "recommendedOrder": []
+    },
+    "rootCauseAnalysis": {
+      "causes": [],
+      "triggeringCode": [],
+      "prevention": []
+    }
+  },
+  "advancedSecurity": {
+    "secretLeakage": {
+      "apiKeys": [],
+      "jwtSecrets": [],
+      "firebaseConfigs": [],
+      "awsCredentials": [],
+      "otherSecrets": []
+    },
+    "malwareDetection": {
+      "suspiciousScripts": [],
+      "cryptoMiners": [],
+      "obfuscatedCode": [],
+      "backdoors": []
+    },
+    "secureCodingSuggestions": {
+      "encryption": [],
+      "authentication": [],
+      "databaseQueries": []
+    }
+  }
+}
+
+Mode-specific rules:
+- analyze: prioritize findings and explanations.
+- fix: put complete corrected code in premiumFeatures.fixEntireFile.fixedCode.
+- optimize: put complete optimized code in premiumFeatures.oneClickOptimization.optimizedCode.
+
+Dependency context:
+${JSON.stringify(dependencyContext, null, 2)}
+
+Submitted code:
+<<<CODE
+${code || ""}
+CODE`;
+
    const aiRes = await axios.post(
   "https://api.groq.com/openai/v1/chat/completions",
   {
     model: "llama-3.1-8b-instant",
     temperature: 0.1,
     messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user",   content: userPrompt },
+      { role: "system", content: compactSystemPrompt },
+      { role: "user",   content: compactUserPrompt },
     ],
   },
   {
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+    timeout: 45000,
   }
 );
 
@@ -982,10 +1135,17 @@ const end = aiText.lastIndexOf("}");
     res.json(parsed);
 
   } catch (err) {
-    console.log(err.message);
+    console.log(
+      "Review failed:",
+      err.response?.status || "",
+      err.response?.data || err.message
+    );
 
     res.status(500).json({
-      message: "Review failed",
+      message:
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        "Review failed",
     });
   }
 };
