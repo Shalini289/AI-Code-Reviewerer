@@ -13,17 +13,23 @@ import {
 export default function ReviewsPage() {
   const [reviews, setReviews] =
     useState([]);
+  const [error, setError] =
+    useState("");
 
   const fetchReviews =
     async () => {
       try {
+        setError("");
         const data =
           await getReviews();
 
         setReviews(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load reviews."
+        );
       }
     };
 
@@ -36,12 +42,16 @@ export default function ReviewsPage() {
   const handleDelete =
     async (id) => {
       try {
+        setError("");
         await deleteReview(id);
 
         fetchReviews();
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not delete this review."
+        );
       }
     };
 
@@ -50,6 +60,8 @@ export default function ReviewsPage() {
       <h1>
         Manage Reviews
       </h1>
+
+      {error && <p>{error}</p>}
 
       <table className="admin-table">
         <thead>

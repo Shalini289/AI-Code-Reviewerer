@@ -19,6 +19,88 @@ const LANGUAGE_OPTIONS = [
   { value: "rust", label: "Rust", monaco: "rust" },
 ];
 
+const PERSONA_OPTIONS = [
+  "Strict Senior Engineer",
+  "Friendly Teacher",
+  "Security Auditor",
+  "Startup CTO",
+  "Interviewer",
+  "Debugging at 2 AM",
+];
+
+const NEXT_GEN_MODES = [
+  {
+    id: "bug-time-machine",
+    label: "Bug Time Machine",
+    question:
+      "Run Bug Time Machine. Infer where this bug was probably introduced, what safeguard may have been removed, and which visible change pattern created the risk.",
+  },
+  {
+    id: "mistake-fingerprint",
+    label: "Mistake Fingerprint",
+    question:
+      "Create a Developer Mistake Fingerprint. Find repeated mistake patterns, private coaching tips, and focused practice areas.",
+  },
+  {
+    id: "production-simulator",
+    label: "Production Simulator",
+    question:
+      "Run a Production Failure Simulator. Predict likely crashes, risky inputs, timeouts, overload risks, and monitoring checks.",
+  },
+  {
+    id: "debate",
+    label: "Reviewer Debate",
+    question:
+      "Run Code Review Debate Mode. Let Security, Performance, and Maintainability reviewers argue, then give a final judge decision.",
+  },
+  {
+    id: "invisible-risk",
+    label: "Invisible Risk",
+    question:
+      "Run Invisible Risk Detector. Find hidden risks that are not syntax errors, including growth, data leakage, ordering, and environment assumptions.",
+  },
+  {
+    id: "fix-confidence",
+    label: "Fix Confidence",
+    question:
+      "Generate a Fix Confidence Score. Estimate confidence, behavior-change risk, required tests, and rollback notes.",
+  },
+  {
+    id: "review-replay",
+    label: "Review Replay",
+    question:
+      "Create a Review Replay timeline showing issue found, fix suggested, fix applied, and verification steps.",
+  },
+  {
+    id: "personality",
+    label: "Personality Mode",
+    question:
+      "Apply the selected AI Reviewer Personality Mode. Keep the review factual but adapt tone and explanation style.",
+  },
+  {
+    id: "health-forecast",
+    label: "Health Forecast",
+    question:
+      "Generate a Code Health Forecast. Predict maintainability pressure, files that should split soon, dependency risk, and future warnings.",
+  },
+  {
+    id: "debug-2am",
+    label: "Debugging at 2 AM",
+    question:
+      "Explain Like I am Debugging at 2 AM. Tell me what broke, why it broke, the exact line to check, and the fastest safe fix.",
+  },
+];
+
+const SAMPLE_CODE = `function calculateTotal(items) {
+  let total = 0;
+
+  for (let i = 0; i <= items.length; i++) {
+    total += items[i].price;
+  }
+
+  return total;
+}`;
+
 export default function ReviewPage() {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
@@ -28,11 +110,9 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ideTheme, setIdeTheme] = useState("vs-dark");
+  const [personality, setPersonality] = useState(PERSONA_OPTIONS[0]);
   const [sandboxOutput, setSandboxOutput] = useState("");
   const [leaderboard, setLeaderboard] = useState([]);
-  const [sessionId] = useState(() =>
-    Math.random().toString(36).slice(2, 10).toUpperCase()
-  );
 
   const monacoLanguage = useMemo(
     () =>
@@ -41,10 +121,7 @@ export default function ReviewPage() {
     [language]
   );
 
-  const sessionUrl =
-    typeof window === "undefined"
-      ? ""
-      : `${window.location.origin}/dashboard/review?session=${sessionId}`;
+  const latestScore = result?.premiumFeatures?.codeScore;
 
   useEffect(() => {
     const rawDraft = localStorage.getItem("aiReviewerDraft");
@@ -77,6 +154,7 @@ export default function ReviewPage() {
         language,
         question,
         mode,
+        personality,
         screenshotName: screenshot?.name || "",
         screenshotDataUrl: screenshot?.dataUrl || "",
       });
@@ -111,6 +189,11 @@ export default function ReviewPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const runNextGenMode = (item) => {
+    setQuestion(item.question);
+    return runReview(item.id);
   };
 
   const handleApplyFixedCode = async () => {
@@ -198,9 +281,23 @@ export default function ReviewPage() {
     reader.readAsDataURL(file);
   };
 
-  const copySessionLink = async () => {
-    if (!navigator.clipboard || !sessionUrl) return;
-    await navigator.clipboard.writeText(sessionUrl);
+  const loadSampleCode = () => {
+    setCode(SAMPLE_CODE);
+    setLanguage("javascript");
+    setQuestion("Find bugs, explain the issue, and suggest the safest fix.");
+    setPersonality(PERSONA_OPTIONS[0]);
+    setResult(null);
+    setError("");
+    setSandboxOutput("");
+  };
+
+  const clearReviewer = () => {
+    setCode("");
+    setQuestion("");
+    setScreenshot(null);
+    setResult(null);
+    setError("");
+    setSandboxOutput("");
   };
 
   return (
@@ -208,7 +305,16 @@ export default function ReviewPage() {
       <div className="review-header">
         <div>
           <h1>AI Code Reviewer</h1>
-          <p>Review, fix, optimize, execute, and score code in one workspace.</p>
+          <p>Paste code, analyze issues, run JavaScript safely, then apply fixes or optimizations.</p>
+        </div>
+
+        <div className="review-header-actions">
+          <button className="secondary-action" onClick={loadSampleCode}>
+            Load sample
+          </button>
+          <button className="secondary-action" onClick={clearReviewer}>
+            Clear
+          </button>
         </div>
       </div>
 
@@ -232,6 +338,17 @@ export default function ReviewPage() {
             >
               <option value="vs-dark">Dark IDE</option>
               <option value="vs">Light IDE</option>
+            </select>
+
+            <select
+              value={personality}
+              onChange={(e) => setPersonality(e.target.value)}
+            >
+              {PERSONA_OPTIONS.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -257,6 +374,24 @@ export default function ReviewPage() {
             onChange={(e) => setQuestion(e.target.value)}
             placeholder='Ask the AI pair programmer: "What should I build next?", "Can this be optimized?", or "Find vulnerabilities"'
           />
+
+          <div className="next-gen-panel">
+            <div>
+              <h2>Next-gen Review Modes</h2>
+              <p>Run one focused feature or use Analyze for the full review.</p>
+            </div>
+            <div className="next-gen-actions">
+              {NEXT_GEN_MODES.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => runNextGenMode(item)}
+                  disabled={loading}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <input
             type="file"
@@ -286,11 +421,25 @@ export default function ReviewPage() {
 
         <aside className="review-side">
           <div className="premium-panel">
-            <h3>Collaborative Review</h3>
-            <p>Session {sessionId}</p>
-            <button className="secondary-action" onClick={copySessionLink}>
-              Copy session link
-            </button>
+            <h3>Review Status</h3>
+            <div className="review-status-list">
+              <div>
+                <span>Language</span>
+                <strong>{LANGUAGE_OPTIONS.find((item) => item.value === language)?.label}</strong>
+              </div>
+              <div>
+                <span>Code size</span>
+                <strong>{code.length} chars</strong>
+              </div>
+              <div>
+                <span>Mode</span>
+                <strong>{loading ? "Running" : result ? "Completed" : "Ready"}</strong>
+              </div>
+              <div>
+                <span>Personality</span>
+                <strong>{personality}</strong>
+              </div>
+            </div>
           </div>
 
           <div className="premium-panel">
@@ -299,8 +448,20 @@ export default function ReviewPage() {
           </div>
 
           <div className="premium-panel">
-            <h3>Developer Leaderboard</h3>
-            {leaderboard.length ? (
+            <h3>Latest Score</h3>
+            {latestScore ? (
+              <div className="review-score-panel">
+                <strong>{latestScore.overall ?? 0}/100</strong>
+                <p>{latestScore.summary || "Score generated from the latest review."}</p>
+              </div>
+            ) : (
+              <p>Run Analyze to generate correctness, security, performance, and readability scores.</p>
+            )}
+          </div>
+
+          {leaderboard.length > 0 && (
+            <div className="premium-panel">
+              <h3>Top Local Scores</h3>
               <ol>
                 {leaderboard.map((entry) => (
                   <li key={entry.id}>
@@ -309,10 +470,8 @@ export default function ReviewPage() {
                   </li>
                 ))}
               </ol>
-            ) : (
-              <p>No scores yet.</p>
-            )}
-          </div>
+            </div>
+          )}
         </aside>
       </div>
 

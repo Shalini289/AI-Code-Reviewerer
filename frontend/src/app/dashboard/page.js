@@ -14,17 +14,23 @@ import "@/styles/dashboard.css";
 export default function DashboardPage() {
   const [data, setData] =
     useState(null);
+  const [error, setError] =
+    useState("");
 
   const fetchDashboard =
     async () => {
       try {
+        setError("");
         const res =
           await getDashboardData();
 
         setData(res);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load dashboard data."
+        );
       }
     };
 
@@ -36,9 +42,9 @@ export default function DashboardPage() {
 
   if (!data)
     return (
-      <p>
-        Loading...
-      </p>
+      <div className="dashboard-page">
+        {error ? <p className="error">{error}</p> : <p>Loading...</p>}
+      </div>
     );
 
   return (

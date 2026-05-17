@@ -12,17 +12,23 @@ import {
 export default function AdminPage() {
   const [stats, setStats] =
     useState(null);
+  const [error, setError] =
+    useState("");
 
   const fetchStats =
     async () => {
       try {
+        setError("");
         const data =
           await getAdminStats();
 
         setStats(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load admin stats."
+        );
       }
     };
 
@@ -35,7 +41,7 @@ export default function AdminPage() {
   if (!stats)
     return (
       <p>
-        Loading...
+        {error || "Loading..."}
       </p>
     );
 

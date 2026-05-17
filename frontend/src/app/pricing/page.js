@@ -1,139 +1,105 @@
 "use client";
 
-import {
-  upgradePlan,
-} from "@/services/paymentService";
-
+import { useState } from "react";
+import { upgradePlan } from "@/services/paymentService";
 import "@/styles/landing.css";
 
+const plans = [
+  {
+    id: "free",
+    name: "Free",
+    price: "INR 0/month",
+    cta: "Select Plan",
+    features: ["10 Reviews/day", "Basic AI Review", "Community Support"],
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "INR 499/month",
+    cta: "Upgrade Now",
+    featured: true,
+    features: ["Unlimited Reviews", "Advanced AI Review", "Priority Support"],
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: "INR 1499/month",
+    cta: "Upgrade Now",
+    features: ["Team Access", "Admin Dashboard", "Dedicated Support"],
+  },
+];
+
 export default function PricingPage() {
-  const handleUpgrade =
-    async (plan) => {
-      try {
-        await upgradePlan(
-          plan
-        );
+  const [status, setStatus] = useState({
+    type: "",
+    message: "",
+  });
+  const [loadingPlan, setLoadingPlan] = useState("");
 
-        alert(
-          `${plan} Plan Activated`
-        );
+  const handleUpgrade = async (plan) => {
+    try {
+      setLoadingPlan(plan);
+      setStatus({ type: "", message: "" });
 
-      } catch (err) {
-        console.log(err);
-      }
-    };
+      await upgradePlan(plan);
+
+      setStatus({
+        type: "success",
+        message: `${plan} plan activated.`,
+      });
+    } catch (err) {
+      setStatus({
+        type: "error",
+        message:
+          err.response?.data?.message ||
+          "Could not update the plan. Please log in and try again.",
+      });
+    } finally {
+      setLoadingPlan("");
+    }
+  };
 
   return (
     <div className="pricing-page">
-
       <section className="pricing-header">
-        <h1>
-          Pricing Plans
-        </h1>
-
-        <p>
-          Choose the perfect
-          plan for your coding
-          journey.
-        </p>
+        <h1>Pricing Plans</h1>
+        <p>Choose the plan that fits your code review workflow.</p>
       </section>
 
+      {status.message ? (
+        <p
+          className={
+            status.type === "success"
+              ? "form-message success"
+              : "form-message error-message"
+          }
+        >
+          {status.message}
+        </p>
+      ) : null}
+
       <div className="pricing-grid">
-
-        <div className="pricing-card">
-          <h2>Free</h2>
-
-          <h3>
-            ₹0/month
-          </h3>
-
-          <ul>
-            <li>
-              10 Reviews/day
-            </li>
-            <li>
-              Basic AI Review
-            </li>
-            <li>
-              Community Support
-            </li>
-          </ul>
-
-          <button
-            onClick={() =>
-              handleUpgrade(
-                "free"
-              )
-            }
+        {plans.map((plan) => (
+          <div
+            className={`pricing-card ${plan.featured ? "featured" : ""}`}
+            key={plan.id}
           >
-            Select Plan
-          </button>
-        </div>
-
-        <div className="pricing-card featured">
-          <h2>Pro</h2>
-
-          <h3>
-            ₹499/month
-          </h3>
-
-          <ul>
-            <li>
-              Unlimited Reviews
-            </li>
-            <li>
-              Advanced AI Review
-            </li>
-            <li>
-              Priority Support
-            </li>
-          </ul>
-
-          <button
-            onClick={() =>
-              handleUpgrade(
-                "pro"
-              )
-            }
-          >
-            Upgrade Now
-          </button>
-        </div>
-
-        <div className="pricing-card">
-          <h2>
-            Enterprise
-          </h2>
-
-          <h3>
-            ₹1499/month
-          </h3>
-
-          <ul>
-            <li>
-              Team Access
-            </li>
-            <li>
-              Admin Dashboard
-            </li>
-            <li>
-              Dedicated Support
-            </li>
-          </ul>
-
-          <button
-            onClick={() =>
-              handleUpgrade(
-                "enterprise"
-              )
-            }
-          >
-            Upgrade Now
-          </button>
-        </div>
-
+            <h2>{plan.name}</h2>
+            <h3>{plan.price}</h3>
+            <ul>
+              {plan.features.map((feature) => (
+                <li key={feature}>{feature}</li>
+              ))}
+            </ul>
+            <button
+              onClick={() => handleUpgrade(plan.id)}
+              disabled={loadingPlan === plan.id}
+            >
+              {loadingPlan === plan.id ? "Updating..." : plan.cta}
+            </button>
+          </div>
+        ))}
       </div>
-
     </div>
   );
 }

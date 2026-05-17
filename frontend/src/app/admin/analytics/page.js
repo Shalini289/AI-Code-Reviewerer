@@ -12,17 +12,23 @@ import {
 export default function AnalyticsPage() {
   const [stats, setStats] =
     useState(null);
+  const [error, setError] =
+    useState("");
 
   const fetchStats =
     async () => {
       try {
+        setError("");
         const data =
           await getAdminStats();
 
         setStats(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load analytics."
+        );
       }
     };
 
@@ -35,7 +41,7 @@ export default function AnalyticsPage() {
   if (!stats)
     return (
       <p>
-        Loading...
+        {error || "Loading..."}
       </p>
     );
 
@@ -79,12 +85,14 @@ export default function AnalyticsPage() {
           </h3>
 
           <p>
-            {(
-              stats.totalReviews /
-              stats.totalUsers
-            ).toFixed(
-              1
-            )}
+            {stats.totalUsers
+              ? (
+                stats.totalReviews /
+                stats.totalUsers
+              ).toFixed(
+                1
+              )
+              : "0.0"}
           </p>
         </div>
 

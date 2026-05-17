@@ -1,8 +1,8 @@
 "use client";
 
-import "@/styles/landing.css";
 import { useState } from "react";
 import { submitContact } from "@/services/contactService";
+import "@/styles/landing.css";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -10,44 +10,53 @@ export default function ContactPage() {
     email: "",
     message: "",
   });
-
   const [loading, setLoading] = useState(false);
-  const handleChange = (e) => {
+  const [status, setStatus] = useState({
+    type: "",
+    message: "",
+  });
+
+  const handleChange = (event) => {
     setForm({
       ...form,
-      [e.target.name]:
-        e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus({ type: "", message: "" });
+
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setStatus({
+        type: "error",
+        message: "Please fill in every field before sending.",
+      });
+      return;
+    }
 
     try {
-     setLoading(true);
-
+      setLoading(true);
       await submitContact(form);
 
-      alert(
-        "Message Sent!"
-      );
+      setStatus({
+        type: "success",
+        message: "Message sent successfully.",
+      });
 
       setForm({
         name: "",
         email: "",
         message: "",
       });
-
     } catch (err) {
-      console.log(
-        err.response?.data
-      );
-
-      alert(
-        "Failed to send message"
-      );
-    }
-    finally {
+      setStatus({
+        type: "error",
+        message:
+          err.response?.data?.message ||
+          "Failed to send message. Please try again.",
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -56,35 +65,35 @@ export default function ContactPage() {
     <div className="contact-page">
       <section className="contact-header">
         <h1>Contact Us</h1>
-
         <p>
-          Have questions,
-          feedback, or need
-          support? We&apos;d love
-          to hear from you.
+          Have questions, feedback, or need support? We&apos;d love to hear from
+          you.
         </p>
       </section>
 
       <div className="contact-container">
-
         <div className="contact-form-card">
-          <h2>
-            Send Message
-          </h2>
+          <h2>Send Message</h2>
 
-          <form
-            onSubmit={
-              handleSubmit
-            }
-          >
+          <form onSubmit={handleSubmit}>
+            {status.message ? (
+              <p
+                className={
+                  status.type === "success"
+                    ? "form-message success"
+                    : "form-message error-message"
+                }
+              >
+                {status.message}
+              </p>
+            ) : null}
+
             <input
               type="text"
               name="name"
               placeholder="Your Name"
               value={form.name}
-              onChange={
-                handleChange
-              }
+              onChange={handleChange}
             />
 
             <input
@@ -92,47 +101,28 @@ export default function ContactPage() {
               name="email"
               placeholder="Your Email"
               value={form.email}
-              onChange={
-                handleChange
-              }
+              onChange={handleChange}
             />
 
             <textarea
               rows="6"
               name="message"
               placeholder="Your Message"
-              value={
-                form.message
-              }
-              onChange={
-                handleChange
-              }
-            ></textarea>
+              value={form.message}
+              onChange={handleChange}
+            />
 
-            <button type="submit">
-              Send Message
+            <button type="submit" disabled={loading}>
+              {loading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>
 
         <div className="contact-info-card">
-          <h2>
-            Get In Touch
-          </h2>
-
-          <p>
-            📧 support@aicodereviewer.com
-          </p>
-
-          <p>
-            📞 +91 3456543210
-          </p>
-
-          <p>
-            📍 Bhopal,
-            Madhya Pradesh,
-            India
-          </p>
+          <h2>Get In Touch</h2>
+          <p>Email: support@aicodereviewer.com</p>
+          <p>Phone: +91 3456543210</p>
+          <p>Location: Bhopal, Madhya Pradesh, India</p>
         </div>
       </div>
     </div>

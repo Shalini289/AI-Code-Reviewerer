@@ -31,24 +31,29 @@ export default function GithubReviewPage() {
   const [repoUrl, setRepoUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const automation = result?.githubAutomation || {};
   const cicd = result?.cicdIntegration || {};
 
   const handleReview = async () => {
     if (!repoUrl.includes("github.com")) {
-      alert("Enter valid GitHub URL");
+      setError("Enter a valid GitHub repository URL.");
       return;
     }
 
     try {
       setLoading(true);
+      setError("");
 
       const data = await reviewGithubRepo(repoUrl);
 
       setResult(data);
-    } catch {
-      alert("Failed to fetch review");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Failed to fetch repository review."
+      );
     } finally {
       setLoading(false);
     }
@@ -65,9 +70,11 @@ export default function GithubReviewPage() {
         onChange={(e) => setRepoUrl(e.target.value)}
       />
 
-      <button onClick={handleReview}>
+      <button onClick={handleReview} disabled={loading}>
         {loading ? "Analyzing..." : "Analyze"}
       </button>
+
+      {error && <p className="error">{error}</p>}
 
       {result && (
         <div className="review-grid">

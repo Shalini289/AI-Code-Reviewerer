@@ -14,17 +14,23 @@ import "@/styles/dashboard.css";
 export default function BillingPage() {
   const [billing, setBilling] =
     useState(null);
+  const [error, setError] =
+    useState("");
 
   const fetchBilling =
     async () => {
       try {
+        setError("");
         const data =
           await getBillingInfo();
 
         setBilling(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load billing information."
+        );
       }
     };
 
@@ -36,9 +42,9 @@ export default function BillingPage() {
 
   if (!billing)
     return (
-      <p>
-        Loading...
-      </p>
+      <div className="billing-page">
+        {error ? <p className="error">{error}</p> : <p>Loading...</p>}
+      </div>
     );
 
   return (

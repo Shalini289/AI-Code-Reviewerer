@@ -186,6 +186,26 @@ export default function ReviewResult({ result }) {
     quantumInspiredAnalysis.quantumAlgorithmRecommendation || {};
   const quantumComplexityAnalyzer =
     quantumInspiredAnalysis.quantumComplexityAnalyzer || {};
+  const nextGenFeatures = result.nextGenFeatures || {};
+  const bugTimeMachine = nextGenFeatures.bugTimeMachine || {};
+  const developerMistakeFingerprint =
+    nextGenFeatures.developerMistakeFingerprint || {};
+  const productionFailureSimulator =
+    nextGenFeatures.productionFailureSimulator || {};
+  const reviewDebateMode =
+    nextGenFeatures.reviewDebateMode || {};
+  const invisibleRiskDetector =
+    nextGenFeatures.invisibleRiskDetector || {};
+  const fixConfidenceScore =
+    nextGenFeatures.fixConfidenceScore || {};
+  const reviewReplay =
+    nextGenFeatures.reviewReplay || {};
+  const reviewerPersonalityMode =
+    nextGenFeatures.reviewerPersonalityMode || {};
+  const codeHealthForecast =
+    nextGenFeatures.codeHealthForecast || {};
+  const debuggingAt2AM =
+    nextGenFeatures.debuggingAt2AM || {};
 
   const speakReview = () => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
@@ -204,6 +224,125 @@ export default function ReviewResult({ result }) {
     <div className="review-grid">
       <ReviewCard title="Summary">
         <p>{result.summary || "No summary"}</p>
+      </ReviewCard>
+
+      <ReviewCard title="Bug Time Machine">
+        <GroupedFindings
+          groups={[
+            { title: "Likely introduction points", items: bugTimeMachine.probableIntroductionPoints },
+            { title: "Removed safeguards", items: bugTimeMachine.removedSafeguards },
+            { title: "Suspicious change patterns", items: bugTimeMachine.suspiciousChangePatterns },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Developer Mistake Fingerprint">
+        <GroupedFindings
+          groups={[
+            { title: "Repeated patterns", items: developerMistakeFingerprint.repeatedPatterns },
+            { title: "Private coaching tips", items: developerMistakeFingerprint.coachingTips },
+            { title: "Practice focus", items: developerMistakeFingerprint.privatePracticeFocus },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Production Failure Simulator">
+        <GroupedFindings
+          groups={[
+            { title: "Likely crashes", items: productionFailureSimulator.likelyCrashes },
+            { title: "Risky inputs", items: productionFailureSimulator.riskyInputs },
+            { title: "Timeout risks", items: productionFailureSimulator.timeoutRisks },
+            { title: "Overload risks", items: productionFailureSimulator.overloadRisks },
+            { title: "Monitoring checks", items: productionFailureSimulator.monitoringChecks },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Code Review Debate Mode" fullWidth>
+        <GroupedFindings
+          groups={[
+            { title: "Security reviewer", items: reviewDebateMode.securityReviewer },
+            { title: "Performance reviewer", items: reviewDebateMode.performanceReviewer },
+            { title: "Maintainability reviewer", items: reviewDebateMode.maintainabilityReviewer },
+            { title: "Final judge decision", items: reviewDebateMode.finalJudgeDecision },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Invisible Risk Detector">
+        <GroupedFindings
+          groups={[
+            { title: "Growth risks", items: invisibleRiskDetector.growthRisks },
+            { title: "Hidden data leaks", items: invisibleRiskDetector.hiddenDataLeaks },
+            { title: "Ordering dependencies", items: invisibleRiskDetector.orderingDependencies },
+            { title: "Environment assumptions", items: invisibleRiskDetector.environmentAssumptions },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Fix Confidence Score">
+        <div className="score-display">{fixConfidenceScore.confidence ?? 0}%</div>
+        <div className="metric-row">
+          <span>Behavior risk</span>
+          <strong>{fixConfidenceScore.behaviorChangeRisk || "N/A"}</strong>
+        </div>
+        <GroupedFindings
+          groups={[
+            { title: "Tests to run", items: fixConfidenceScore.testsToRun },
+            { title: "Rollback notes", items: fixConfidenceScore.rollbackNotes },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Review Replay">
+        <GroupedFindings
+          groups={[
+            { title: "Timeline", items: reviewReplay.timeline },
+            { title: "Issue to fix flow", items: reviewReplay.issueToFixFlow },
+            { title: "Verification steps", items: reviewReplay.verificationSteps },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="AI Reviewer Personality Mode">
+        <div className="metric-row">
+          <span>Selected</span>
+          <strong>{reviewerPersonalityMode.selectedPersonality || "N/A"}</strong>
+        </div>
+        <p>{reviewerPersonalityMode.responseStyle || "No personality style returned."}</p>
+        <GroupedFindings
+          groups={[{ title: "Persona notes", items: reviewerPersonalityMode.personaNotes }]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Code Health Forecast">
+        <p>{codeHealthForecast.maintainabilityForecast || "No forecast available."}</p>
+        <GroupedFindings
+          groups={[
+            { title: "Should split soon", items: codeHealthForecast.splitSoon },
+            { title: "Dependency risk", items: codeHealthForecast.dependencyRisk },
+            { title: "Future warnings", items: codeHealthForecast.futureWarnings },
+          ]}
+        />
+      </ReviewCard>
+
+      <ReviewCard title="Explain Like Debugging at 2 AM" fullWidth>
+        <div className="metric-row">
+          <span>What broke</span>
+          <strong>{debuggingAt2AM.whatBroke || "N/A"}</strong>
+        </div>
+        <div className="metric-row">
+          <span>Why</span>
+          <strong>{debuggingAt2AM.whyItBroke || "N/A"}</strong>
+        </div>
+        <div className="metric-row">
+          <span>Line to check</span>
+          <strong>{debuggingAt2AM.lineToCheck || "N/A"}</strong>
+        </div>
+        <div className="metric-row">
+          <span>Fastest safe fix</span>
+          <strong>{debuggingAt2AM.fastestSafeFix || "N/A"}</strong>
+        </div>
       </ReviewCard>
 
       <ReviewCard title="Bug Detection">

@@ -13,17 +13,23 @@ import {
 export default function UsersPage() {
   const [users, setUsers] =
     useState([]);
+  const [error, setError] =
+    useState("");
 
   const fetchUsers =
     async () => {
       try {
+        setError("");
         const data =
           await getUsers();
 
         setUsers(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load users."
+        );
       }
     };
 
@@ -36,12 +42,16 @@ export default function UsersPage() {
   const handleDelete =
     async (id) => {
       try {
+        setError("");
         await deleteUser(id);
 
         fetchUsers();
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not delete this user."
+        );
       }
     };
 
@@ -50,6 +60,8 @@ export default function UsersPage() {
       <h1>
         Manage Users
       </h1>
+
+      {error && <p>{error}</p>}
 
       <table className="admin-table">
         <thead>

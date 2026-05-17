@@ -15,19 +15,21 @@ import "@/styles/dashboard.css";
 export default function History() {
   const [reviews, setReviews] =
     useState([]);
+  const [error, setError] =
+    useState("");
 
 const fetchHistory = async () => {
   try {
-    console.log("Fetching History...");
+    setError("");
     const data =
       await getReviewHistory();
 
     setReviews(data);
 
   } catch (err) {
-    console.log(
-      "HISTORY ERROR:",
-      err.response?.data
+    setError(
+      err.response?.data?.message ||
+      "Could not load review history."
     );
   }
 };
@@ -40,9 +42,16 @@ const fetchHistory = async () => {
 
   const handleDelete =
     async (id) => {
-      await deleteReview(id);
-
-      fetchHistory();
+      try {
+        setError("");
+        await deleteReview(id);
+        fetchHistory();
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+          "Could not delete this review."
+        );
+      }
     };
 
   return (
@@ -50,6 +59,8 @@ const fetchHistory = async () => {
       <h1>
         Review History
       </h1>
+
+      {error && <p className="error">{error}</p>}
 
       <div className="history-grid">
         {reviews.map(

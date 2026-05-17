@@ -6,6 +6,27 @@ const crypto =
 
 const nodemailer =
   require("nodemailer");
+
+const createEmailTransporter = () =>
+  nodemailer.createTransport({
+    host:
+      process.env.EMAIL_HOST ||
+      "smtp.gmail.com",
+    port:
+      Number(process.env.EMAIL_PORT) ||
+      465,
+    secure:
+      process.env.EMAIL_SECURE
+        ? process.env.EMAIL_SECURE === "true"
+        : true,
+    auth: {
+      user:
+        process.env.EMAIL_USER,
+      pass:
+        process.env.EMAIL_PASS,
+    },
+  });
+
 exports.register = async (
   req,
   res
@@ -130,8 +151,20 @@ exports.login = async (
 exports.forgotPassword =
   async (req, res) => {
     try {
-      const { email } =
-        req.body;
+      const email =
+        String(
+          req.body.email ||
+          ""
+        )
+          .trim()
+          .toLowerCase();
+
+      if (!email) {
+        return res.status(400).json({
+          message:
+            "Email is required",
+        });
+      }
 
       const user =
         await User.findOne({
@@ -173,28 +206,21 @@ exports.forgotPassword =
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         return res.status(500).json({
           message:
-            "Email service is not configured",
+            "Email service is not configured. Add EMAIL_USER and EMAIL_PASS in backend/.env, then rebuild Docker.",
         });
       }
 
       const transporter =
-        nodemailer.createTransport(
-          {
-            service:
-              "gmail",
-            auth: {
-              user:
-                process.env.EMAIL_USER,
-              pass:
-                process.env.EMAIL_PASS,
-            },
-          }
-        );
+        createEmailTransporter();
 
-      await transporter.sendMail(
+      await transporter.verify();
+
+      const mailInfo =
+        await transporter.sendMail(
         {
           from:
-            process.env.EMAIL_USER,
+            process.env.EMAIL_FROM ||
+            `"AI Code Reviewer" <${process.env.EMAIL_USER}>`,
           to: user.email,
           subject:
             "Reset your AI Code Reviewer password",
@@ -207,15 +233,30 @@ exports.forgotPassword =
         }
       );
 
+      if (mailInfo.rejected?.length) {
+        throw new Error(
+          `Email rejected for ${mailInfo.rejected.join(", ")}`
+        );
+      }
+
+      console.log(
+        `Password reset email accepted for ${user.email}. Message id: ${mailInfo.messageId}`
+      );
+
       res.json({
         message:
-          "Reset Email Sent",
+          "Reset email sent. Please check your inbox and spam folder.",
       });
 
     } catch (err) {
+      console.error(
+        "Forgot password email failed:",
+        err.message
+      );
+
       res.status(500).json({
         message:
-          err.message,
+          "Could not send reset email. Check EMAIL_USER, EMAIL_PASS, and Gmail app password settings.",
       });
     }
   };

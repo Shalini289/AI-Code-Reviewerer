@@ -14,17 +14,23 @@ import "@/styles/dashboard.css";
 export default function ProfilePage() {
   const [profile, setProfile] =
     useState(null);
+  const [error, setError] =
+    useState("");
 
   const fetchProfile =
     async () => {
       try {
+        setError("");
         const data =
           await getProfile();
 
         setProfile(data);
 
       } catch (err) {
-        console.log(err);
+        setError(
+          err.response?.data?.message ||
+          "Could not load profile."
+        );
       }
     };
 
@@ -36,9 +42,9 @@ export default function ProfilePage() {
 
   if (!profile)
     return (
-      <p>
-        Loading...
-      </p>
+      <div className="profile-page">
+        {error ? <p className="error">{error}</p> : <p>Loading...</p>}
+      </div>
     );
 
   return (
