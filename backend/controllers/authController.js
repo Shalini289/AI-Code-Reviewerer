@@ -4,28 +4,11 @@ const jwt = require("jsonwebtoken");
 const crypto =
   require("crypto");
 
-const nodemailer =
-  require("nodemailer");
-
-const createEmailTransporter = () =>
-  nodemailer.createTransport({
-    host:
-      process.env.EMAIL_HOST ||
-      "smtp.gmail.com",
-    port:
-      Number(process.env.EMAIL_PORT) ||
-      465,
-    secure:
-      process.env.EMAIL_SECURE
-        ? process.env.EMAIL_SECURE === "true"
-        : true,
-    auth: {
-      user:
-        process.env.EMAIL_USER,
-      pass:
-        process.env.EMAIL_PASS,
-    },
-  });
+const {
+  isEmailConfigured,
+  sendEmail,
+} =
+  require("../utils/mailer");
 
 exports.register = async (
   req,
@@ -203,27 +186,21 @@ exports.forgotPassword =
       const resetUrl =
         `${frontendUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
 
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      if (!isEmailConfigured()) {
         return res.status(500).json({
           message:
-            "Email service is not configured. Add EMAIL_USER and EMAIL_PASS in backend/.env, then rebuild Docker.",
+            "Email service is not configured. Add Brevo SMTP variables in your deployed backend environment.",
         });
       }
 
-      const transporter =
-        createEmailTransporter();
-
-      await transporter.verify();
-
       const mailInfo =
-        await transporter.sendMail(
+        await sendEmail(
         {
-          from:
-            process.env.EMAIL_FROM ||
-            `"AI Code Reviewer" <${process.env.EMAIL_USER}>`,
           to: user.email,
           subject:
             "Reset your AI Code Reviewer password",
+          text:
+            `Reset your AI Code Reviewer password: ${resetUrl}\n\nThis link expires in 10 minutes.`,
           html: `
 <p>You requested a password reset for AI Code Reviewer.</p>
 <p>This link expires in 10 minutes.</p>
@@ -232,12 +209,6 @@ exports.forgotPassword =
 `,
         }
       );
-
-      if (mailInfo.rejected?.length) {
-        throw new Error(
-          `Email rejected for ${mailInfo.rejected.join(", ")}`
-        );
-      }
 
       console.log(
         `Password reset email accepted for ${user.email}. Message id: ${mailInfo.messageId}`
@@ -251,12 +222,14 @@ exports.forgotPassword =
     } catch (err) {
       console.error(
         "Forgot password email failed:",
-        err.message
+        err.message,
+        err.code || "",
+        err.response || ""
       );
 
       res.status(500).json({
         message:
-          "Could not send reset email. Check EMAIL_USER, EMAIL_PASS, and Gmail app password settings.",
+          "Could not send reset email. Check Brevo SMTP login, SMTP key, verified sender, and deployed backend environment variables.",
       });
     }
   };

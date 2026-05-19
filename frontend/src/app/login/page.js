@@ -88,9 +88,9 @@ export default function Login() {
         />
 
         {/* FORGOT */}
-        <Link href="/forgot-password">
+        {/* <Link href="/forgot-password">
           Forgot Password?
-        </Link>
+        </Link> */}
 
         {/* BUTTON */}
         <button type="submit">

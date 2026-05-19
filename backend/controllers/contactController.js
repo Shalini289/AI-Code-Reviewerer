@@ -1,6 +1,15 @@
 const Contact =
   require("../models/Contact");
-  const nodemailer = require("nodemailer");
+const { sendEmail } =
+  require("../utils/mailer");
+
+const escapeHtml = (value) =>
+  String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 exports.submitContact =
   async (req, res) => {
@@ -13,29 +22,29 @@ try{
       } = req.body;
 
     
-        await Contact.create({
+        const contact =
+          await Contact.create({
           name,
           email,
           message,
         });
 
-        const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-     await transporter.sendMail({
-      to: process.env.EMAIL_USER,
-      subject: "New Contact Message",
-      html: `
+        await sendEmail({
+          to:
+            process.env.CONTACT_EMAIL ||
+            process.env.EMAIL_USER,
+          replyTo: email,
+          subject: "New Contact Message",
+          text:
+            `Name: ${name}\nEmail: ${email}\n\n${message}`,
+          html: `
         <h3>New Message</h3>
-        <p>${name}</p>
-        <p>${email}</p>
-        <p>${message}</p>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
       `,
-    });
+        });
+
       res.status(201).json({
         message:
           "Message sent",
