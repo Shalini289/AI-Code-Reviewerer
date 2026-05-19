@@ -1,16 +1,40 @@
 function toList(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (typeof value === "string" && value.trim()) return [value];
+  if (typeof value === "number" || typeof value === "boolean") return [String(value)];
   return [];
 }
 
-function renderFinding(item) {
-  if (typeof item !== "object" || item === null) return item;
+function asText(value, fallback = "N/A") {
+  if (value === undefined || value === null || value === "") return fallback;
 
-  return Object.entries(item)
-    .filter(([, value]) => value !== undefined && value !== null && value !== "")
-    .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
-    .join(" | ");
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  if (Array.isArray(value)) {
+    const text = value.map((item) => asText(item, "")).filter(Boolean).join(", ");
+    return text || fallback;
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .filter(([, item]) => item !== undefined && item !== null && item !== "")
+      .map(([key, item]) => `${key}: ${asText(item, "")}`)
+      .join(" | ") || fallback;
+  }
+
+  return String(value);
+}
+
+function renderFinding(item) {
+  if (typeof item !== "object" || item === null) return asText(item, "");
+
+  return asText(item, "");
 }
 
 function ListSection({ items }) {
@@ -64,9 +88,9 @@ function LineExplanation({ lines }) {
     <div className="line-explanations">
       {list.map((item, index) => (
         <div className="line-explanation" key={`${item.line}-${index}`}>
-          <span>{item.line || `Line ${index + 1}`}</span>
-          {item.code && <code>{item.code}</code>}
-          <p>{item.explanation || "No explanation provided."}</p>
+          <span>{asText(item.line, `Line ${index + 1}`)}</span>
+          {item.code && <code>{asText(item.code, "")}</code>}
+          <p>{asText(item.explanation, "No explanation provided.")}</p>
         </div>
       ))}
     </div>
@@ -223,7 +247,7 @@ export default function ReviewResult({ result }) {
   return (
     <div className="review-grid">
       <ReviewCard title="Summary">
-        <p>{result.summary || "No summary"}</p>
+        <p>{asText(result.summary, "No summary")}</p>
       </ReviewCard>
 
       <ReviewCard title="Bug Time Machine">
@@ -281,10 +305,10 @@ export default function ReviewResult({ result }) {
       </ReviewCard>
 
       <ReviewCard title="Fix Confidence Score">
-        <div className="score-display">{fixConfidenceScore.confidence ?? 0}%</div>
+        <div className="score-display">{asText(fixConfidenceScore.confidence, 0)}%</div>
         <div className="metric-row">
           <span>Behavior risk</span>
-          <strong>{fixConfidenceScore.behaviorChangeRisk || "N/A"}</strong>
+          <strong>{asText(fixConfidenceScore.behaviorChangeRisk)}</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -307,16 +331,16 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="AI Reviewer Personality Mode">
         <div className="metric-row">
           <span>Selected</span>
-          <strong>{reviewerPersonalityMode.selectedPersonality || "N/A"}</strong>
+          <strong>{asText(reviewerPersonalityMode.selectedPersonality)}</strong>
         </div>
-        <p>{reviewerPersonalityMode.responseStyle || "No personality style returned."}</p>
+        <p>{asText(reviewerPersonalityMode.responseStyle, "No personality style returned.")}</p>
         <GroupedFindings
           groups={[{ title: "Persona notes", items: reviewerPersonalityMode.personaNotes }]}
         />
       </ReviewCard>
 
       <ReviewCard title="Code Health Forecast">
-        <p>{codeHealthForecast.maintainabilityForecast || "No forecast available."}</p>
+        <p>{asText(codeHealthForecast.maintainabilityForecast, "No forecast available.")}</p>
         <GroupedFindings
           groups={[
             { title: "Should split soon", items: codeHealthForecast.splitSoon },
@@ -329,19 +353,19 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Explain Like Debugging at 2 AM" fullWidth>
         <div className="metric-row">
           <span>What broke</span>
-          <strong>{debuggingAt2AM.whatBroke || "N/A"}</strong>
+          <strong>{asText(debuggingAt2AM.whatBroke)}</strong>
         </div>
         <div className="metric-row">
           <span>Why</span>
-          <strong>{debuggingAt2AM.whyItBroke || "N/A"}</strong>
+          <strong>{asText(debuggingAt2AM.whyItBroke)}</strong>
         </div>
         <div className="metric-row">
           <span>Line to check</span>
-          <strong>{debuggingAt2AM.lineToCheck || "N/A"}</strong>
+          <strong>{asText(debuggingAt2AM.lineToCheck)}</strong>
         </div>
         <div className="metric-row">
           <span>Fastest safe fix</span>
-          <strong>{debuggingAt2AM.fastestSafeFix || "N/A"}</strong>
+          <strong>{asText(debuggingAt2AM.fastestSafeFix)}</strong>
         </div>
       </ReviewCard>
 
@@ -372,11 +396,11 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Complexity Analysis">
         <div className="metric-row">
           <span>Time</span>
-          <strong>{complexity.timeComplexity || result.performance || "N/A"}</strong>
+          <strong>{asText(complexity.timeComplexity || result.performance)}</strong>
         </div>
         <div className="metric-row">
           <span>Space</span>
-          <strong>{complexity.spaceComplexity || "N/A"}</strong>
+          <strong>{asText(complexity.spaceComplexity)}</strong>
         </div>
         <div className="finding-group">
           <h4>Unnecessary nested loops</h4>
@@ -409,7 +433,7 @@ export default function ReviewResult({ result }) {
       </ReviewCard>
 
       <ReviewCard title="Simple English Explanation" fullWidth>
-        <p>{smartAI.simpleExplanation || "No explanation available."}</p>
+        <p>{asText(smartAI.simpleExplanation, "No explanation available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="Line-by-line Explanation" fullWidth>
@@ -460,7 +484,7 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Multi-language Support">
         <div className="metric-row">
           <span>Language</span>
-          <strong>{multiLanguage.detectedLanguage || "N/A"}</strong>
+          <strong>{asText(multiLanguage.detectedLanguage)}</strong>
         </div>
         <div className="finding-group">
           <h4>Language-specific notes</h4>
@@ -489,7 +513,7 @@ export default function ReviewResult({ result }) {
       </ReviewCard>
 
       <ReviewCard title="Voice Review Mode">
-        <p>{voiceReview.script || "No voice script available."}</p>
+        <p>{asText(voiceReview.script, "No voice script available.")}</p>
         <button className="secondary-action" onClick={speakReview}>
           Play voice review
         </button>
@@ -498,11 +522,11 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Screenshot-to-code Review" fullWidth>
         <div className="metric-row">
           <span>Status</span>
-          <strong>{screenshotReview.status || "N/A"}</strong>
+          <strong>{asText(screenshotReview.status)}</strong>
         </div>
         <div className="metric-row">
           <span>File</span>
-          <strong>{screenshotReview.uploadedFile || "No screenshot uploaded"}</strong>
+          <strong>{asText(screenshotReview.uploadedFile, "No screenshot uploaded")}</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -515,7 +539,7 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Code Similarity Checker">
         <div className="metric-row">
           <span>Risk</span>
-          <strong>{codeSimilarity.similarityRisk || "N/A"}</strong>
+          <strong>{asText(codeSimilarity.similarityRisk)}</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -558,24 +582,24 @@ export default function ReviewResult({ result }) {
       </ReviewCard>
 
       <ReviewCard title="AI Code Scoring System">
-        <div className="score-display">{codeScore.overall ?? 0}/100</div>
+        <div className="score-display">{asText(codeScore.overall, 0)}/100</div>
         <div className="metric-row">
           <span>Correctness</span>
-          <strong>{codeScore.correctness ?? 0}/100</strong>
+          <strong>{asText(codeScore.correctness, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Security</span>
-          <strong>{codeScore.security ?? 0}/100</strong>
+          <strong>{asText(codeScore.security, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Performance</span>
-          <strong>{codeScore.performance ?? 0}/100</strong>
+          <strong>{asText(codeScore.performance, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Readability</span>
-          <strong>{codeScore.readability ?? 0}/100</strong>
+          <strong>{asText(codeScore.readability, 0)}/100</strong>
         </div>
-        <p>{codeScore.summary || "No scoring summary available."}</p>
+        <p>{asText(codeScore.summary, "No scoring summary available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="AI Pair Programmer">
@@ -621,7 +645,7 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Live Execution Sandbox">
         <div className="metric-row">
           <span>Language</span>
-          <strong>{liveExecutionSandbox.language || "N/A"}</strong>
+          <strong>{asText(liveExecutionSandbox.language)}</strong>
         </div>
         <div className="metric-row">
           <span>Browser run</span>
@@ -741,25 +765,25 @@ export default function ReviewResult({ result }) {
           ]}
         />
         <div className="code-compare-grid">
-          <pre className="code-output">{oneClickRefactoring.asyncAwait || "No async/await refactor returned."}</pre>
-          <pre className="code-output">{oneClickRefactoring.loopsToRecursion || "No recursion refactor returned."}</pre>
-          <pre className="code-output">{oneClickRefactoring.nestedConditions || "No nested-condition refactor returned."}</pre>
+          <pre className="code-output">{asText(oneClickRefactoring.asyncAwait, "No async/await refactor returned.")}</pre>
+          <pre className="code-output">{asText(oneClickRefactoring.loopsToRecursion, "No recursion refactor returned.")}</pre>
+          <pre className="code-output">{asText(oneClickRefactoring.nestedConditions, "No nested-condition refactor returned.")}</pre>
         </div>
       </ReviewCard>
 
       <ReviewCard title="Legacy Code Modernization" fullWidth>
         <div className="code-compare-grid">
-          <pre className="code-output">{legacyModernization.modernJavaScript || "No modern JavaScript version returned."}</pre>
-          <pre className="code-output">{legacyModernization.modernCpp || "No modern C++ version returned."}</pre>
-          <pre className="code-output">{legacyModernization.callbacksToPromises || "No promise-based version returned."}</pre>
+          <pre className="code-output">{asText(legacyModernization.modernJavaScript, "No modern JavaScript version returned.")}</pre>
+          <pre className="code-output">{asText(legacyModernization.modernCpp, "No modern C++ version returned.")}</pre>
+          <pre className="code-output">{asText(legacyModernization.callbacksToPromises, "No promise-based version returned.")}</pre>
         </div>
       </ReviewCard>
 
       <ReviewCard title="Multi-version Refactor Comparison" fullWidth>
         <div className="code-compare-grid">
-          <pre className="code-output">{multiVersionComparison.originalCode || "No original excerpt returned."}</pre>
-          <pre className="code-output">{multiVersionComparison.optimizedCode || "No optimized version returned."}</pre>
-          <pre className="code-output">{multiVersionComparison.highlyOptimizedCode || "No highly optimized version returned."}</pre>
+          <pre className="code-output">{asText(multiVersionComparison.originalCode, "No original excerpt returned.")}</pre>
+          <pre className="code-output">{asText(multiVersionComparison.optimizedCode, "No optimized version returned.")}</pre>
+          <pre className="code-output">{asText(multiVersionComparison.highlyOptimizedCode, "No highly optimized version returned.")}</pre>
         </div>
         <GroupedFindings
           groups={[{ title: "Tradeoffs", items: multiVersionComparison.tradeoffs }]}
@@ -793,9 +817,9 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Code Difficulty Estimator">
         <div className="metric-row">
           <span>Level</span>
-          <strong>{difficultyEstimator.level || "N/A"}</strong>
+          <strong>{asText(difficultyEstimator.level)}</strong>
         </div>
-        <p>{difficultyEstimator.reason || "No difficulty reason available."}</p>
+        <p>{asText(difficultyEstimator.reason, "No difficulty reason available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="Team Review Workspace">
@@ -812,7 +836,7 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="AI Pull Request Reviewer">
         <div className="metric-row">
           <span>Security score</span>
-          <strong>{aiPullRequestReviewer.securityScore ?? 0}/100</strong>
+          <strong>{asText(aiPullRequestReviewer.securityScore, 0)}/100</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -835,7 +859,7 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Deployment Risk Prediction">
         <div className="metric-row">
           <span>Failure chance</span>
-          <strong>{deploymentRiskPrediction.failureChance || "N/A"}</strong>
+          <strong>{asText(deploymentRiskPrediction.failureChance)}</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -849,11 +873,11 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="CI/CD Quality Gates">
         <div className="metric-row">
           <span>Decision</span>
-          <strong>{cicdQualityGates.deploymentDecision || "N/A"}</strong>
+          <strong>{asText(cicdQualityGates.deploymentDecision)}</strong>
         </div>
         <div className="metric-row">
           <span>Security gate</span>
-          <strong>{cicdQualityGates.securityScoreThreshold ?? 0}/100</strong>
+          <strong>{asText(cicdQualityGates.securityScoreThreshold, 0)}/100</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -876,11 +900,11 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Runtime Simulation">
         <div className="metric-row">
           <span>CPU</span>
-          <strong>{runtimeSimulation.cpuUsage || "N/A"}</strong>
+          <strong>{asText(runtimeSimulation.cpuUsage)}</strong>
         </div>
         <div className="metric-row">
           <span>Memory</span>
-          <strong>{runtimeSimulation.memoryUsage || "N/A"}</strong>
+          <strong>{asText(runtimeSimulation.memoryUsage)}</strong>
         </div>
         <GroupedFindings
           groups={[{ title: "Time bottlenecks", items: runtimeSimulation.timeBottlenecks }]}
@@ -890,15 +914,15 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Scalability Prediction">
         <div className="metric-row">
           <span>1k users</span>
-          <strong>{scalabilityPrediction.oneThousandUsers || "N/A"}</strong>
+          <strong>{asText(scalabilityPrediction.oneThousandUsers)}</strong>
         </div>
         <div className="metric-row">
           <span>10k users</span>
-          <strong>{scalabilityPrediction.tenThousandUsers || "N/A"}</strong>
+          <strong>{asText(scalabilityPrediction.tenThousandUsers)}</strong>
         </div>
         <div className="metric-row">
           <span>1M users</span>
-          <strong>{scalabilityPrediction.oneMillionUsers || "N/A"}</strong>
+          <strong>{asText(scalabilityPrediction.oneMillionUsers)}</strong>
         </div>
         <GroupedFindings
           groups={[{ title: "Scaling recommendations", items: scalabilityPrediction.scalingRecommendations }]}
@@ -917,48 +941,48 @@ export default function ReviewResult({ result }) {
 
       <ReviewCard title="Competitive Coding Score System">
         <div className="score-display">
-          {codingScoreSystem.overallCompetitiveScore ?? 0}/100
+          {asText(codingScoreSystem.overallCompetitiveScore, 0)}/100
         </div>
         <div className="metric-row">
           <span>Maintainability</span>
-          <strong>{codingScoreSystem.maintainabilityScore ?? 0}/100</strong>
+          <strong>{asText(codingScoreSystem.maintainabilityScore, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Security</span>
-          <strong>{codingScoreSystem.securityScore ?? 0}/100</strong>
+          <strong>{asText(codingScoreSystem.securityScore, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Readability</span>
-          <strong>{codingScoreSystem.readabilityScore ?? 0}/100</strong>
+          <strong>{asText(codingScoreSystem.readabilityScore, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Performance</span>
-          <strong>{codingScoreSystem.performanceScore ?? 0}/100</strong>
+          <strong>{asText(codingScoreSystem.performanceScore, 0)}/100</strong>
         </div>
-        <p>{codingScoreSystem.scoreSummary || "No competitive score summary available."}</p>
+        <p>{asText(codingScoreSystem.scoreSummary, "No competitive score summary available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="Global Leaderboard">
         <div className="metric-row">
           <span>Cleanest code</span>
-          <strong>{globalLeaderboard.cleanestCodeRank || "N/A"}</strong>
+          <strong>{asText(globalLeaderboard.cleanestCodeRank)}</strong>
         </div>
         <div className="metric-row">
           <span>Fewest bugs</span>
-          <strong>{globalLeaderboard.fewestBugsRank || "N/A"}</strong>
+          <strong>{asText(globalLeaderboard.fewestBugsRank)}</strong>
         </div>
         <div className="metric-row">
           <span>Best optimization</span>
-          <strong>{globalLeaderboard.bestOptimizationRank || "N/A"}</strong>
+          <strong>{asText(globalLeaderboard.bestOptimizationRank)}</strong>
         </div>
-        <p>{globalLeaderboard.leaderboardSummary || "No leaderboard summary available."}</p>
+        <p>{asText(globalLeaderboard.leaderboardSummary, "No leaderboard summary available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="Achievement Badges">
         <div className="badge-list">
           {toList(competitiveFeatures.achievementBadges).length ? (
             toList(competitiveFeatures.achievementBadges).map((badge, index) => (
-              <span key={`${badge}-${index}`}>{badge}</span>
+              <span key={`${asText(badge, "badge")}-${index}`}>{asText(badge, "Badge")}</span>
             ))
           ) : (
             <p>No badges earned yet.</p>
@@ -998,9 +1022,9 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Voice Controlled Coding Assistant">
         <div className="metric-row">
           <span>Intent</span>
-          <strong>{voiceControlledAssistant.detectedIntent || "N/A"}</strong>
+          <strong>{asText(voiceControlledAssistant.detectedIntent)}</strong>
         </div>
-        <p>{voiceControlledAssistant.response || "No voice command response available."}</p>
+        <p>{asText(voiceControlledAssistant.response, "No voice command response available.")}</p>
         <GroupedFindings
           groups={[
             { title: "Supported commands", items: voiceControlledAssistant.supportedCommands },
@@ -1019,9 +1043,9 @@ export default function ReviewResult({ result }) {
 
       <ReviewCard title="Code-to-Flowchart Generator" fullWidth>
         <div className="code-compare-grid">
-          <pre className="code-output">{codeToFlowchart.flowchart || "No flowchart returned."}</pre>
-          <pre className="code-output">{codeToFlowchart.uml || "No UML diagram returned."}</pre>
-          <pre className="code-output">{codeToFlowchart.sequenceDiagram || "No sequence diagram returned."}</pre>
+          <pre className="code-output">{asText(codeToFlowchart.flowchart, "No flowchart returned.")}</pre>
+          <pre className="code-output">{asText(codeToFlowchart.uml, "No UML diagram returned.")}</pre>
+          <pre className="code-output">{asText(codeToFlowchart.sequenceDiagram, "No sequence diagram returned.")}</pre>
         </div>
       </ReviewCard>
 
@@ -1039,21 +1063,21 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Quantum-inspired Optimization Score">
         <div className="metric-row">
           <span>Classical</span>
-          <strong>{quantumOptimization.classicalScore ?? 0}/100</strong>
+          <strong>{asText(quantumOptimization.classicalScore, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Quantum estimate</span>
-          <strong>{quantumOptimization.quantumInspiredEstimate ?? 0}/100</strong>
+          <strong>{asText(quantumOptimization.quantumInspiredEstimate, 0)}/100</strong>
         </div>
         <div className="metric-row">
           <span>Classical O</span>
-          <strong>{quantumOptimization.classicalComplexity || "N/A"}</strong>
+          <strong>{asText(quantumOptimization.classicalComplexity)}</strong>
         </div>
         <div className="metric-row">
           <span>Quantum O</span>
-          <strong>{quantumOptimization.quantumInspiredComplexity || "N/A"}</strong>
+          <strong>{asText(quantumOptimization.quantumInspiredComplexity)}</strong>
         </div>
-        <p>{quantumOptimization.summary || "No quantum-inspired score summary available."}</p>
+        <p>{asText(quantumOptimization.summary, "No quantum-inspired score summary available.")}</p>
       </ReviewCard>
 
       <ReviewCard title="Quantum Secure Code Checker">
@@ -1069,11 +1093,11 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Quantum Algorithm Recommendation">
         <div className="metric-row">
           <span>Classical</span>
-          <strong>{quantumAlgorithmRecommendation.classicalAlgorithm || "N/A"}</strong>
+          <strong>{asText(quantumAlgorithmRecommendation.classicalAlgorithm)}</strong>
         </div>
         <div className="metric-row">
           <span>Quantum</span>
-          <strong>{quantumAlgorithmRecommendation.quantumAlgorithmPossibility || "N/A"}</strong>
+          <strong>{asText(quantumAlgorithmRecommendation.quantumAlgorithmPossibility)}</strong>
         </div>
         <GroupedFindings
           groups={[
@@ -1086,13 +1110,13 @@ export default function ReviewResult({ result }) {
       <ReviewCard title="Quantum Complexity Analyzer">
         <div className="metric-row">
           <span>Classical</span>
-          <strong>{quantumComplexityAnalyzer.classical || "N/A"}</strong>
+          <strong>{asText(quantumComplexityAnalyzer.classical)}</strong>
         </div>
         <div className="metric-row">
           <span>Quantum-inspired</span>
-          <strong>{quantumComplexityAnalyzer.quantumInspired || "N/A"}</strong>
+          <strong>{asText(quantumComplexityAnalyzer.quantumInspired)}</strong>
         </div>
-        <p>{quantumComplexityAnalyzer.practicality || "No practicality analysis available."}</p>
+        <p>{asText(quantumComplexityAnalyzer.practicality, "No practicality analysis available.")}</p>
       </ReviewCard>
     </div>
   );

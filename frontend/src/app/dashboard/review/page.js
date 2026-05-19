@@ -101,6 +101,22 @@ const SAMPLE_CODE = `function calculateTotal(items) {
   return total;
 }`;
 
+const asText = (value, fallback = "N/A") => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "string" || typeof value === "number") return value;
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) {
+    return value.map((item) => asText(item, "")).filter(Boolean).join(", ") || fallback;
+  }
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .filter(([, item]) => item !== undefined && item !== null && item !== "")
+      .map(([key, item]) => `${key}: ${asText(item, "")}`)
+      .join(" | ") || fallback;
+  }
+  return String(value);
+};
+
 export default function ReviewPage() {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
@@ -159,16 +175,20 @@ export default function ReviewPage() {
         screenshotDataUrl: screenshot?.dataUrl || "",
       });
 
+      if (!data || typeof data !== "object") {
+        throw new Error("Review API returned an invalid response.");
+      }
+
       setResult(data);
 
-      const score = data.premiumFeatures?.codeScore?.overall;
+      const score = Number(data.premiumFeatures?.codeScore?.overall);
       if (Number.isFinite(score)) {
         setLeaderboard((current) =>
           [
             {
               id: Date.now(),
               label:
-                data.premiumFeatures?.leaderboard?.scoreLabel ||
+                asText(data.premiumFeatures?.leaderboard?.scoreLabel, "") ||
                 `${language.toUpperCase()} review`,
               score,
             },
@@ -183,6 +203,7 @@ export default function ReviewPage() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
+        err.message ||
         "Review failed"
       );
       return null;
@@ -451,8 +472,8 @@ export default function ReviewPage() {
             <h3>Latest Score</h3>
             {latestScore ? (
               <div className="review-score-panel">
-                <strong>{latestScore.overall ?? 0}/100</strong>
-                <p>{latestScore.summary || "Score generated from the latest review."}</p>
+                <strong>{asText(latestScore.overall, 0)}/100</strong>
+                <p>{asText(latestScore.summary, "Score generated from the latest review.")}</p>
               </div>
             ) : (
               <p>Run Analyze to generate correctness, security, performance, and readability scores.</p>
@@ -465,7 +486,7 @@ export default function ReviewPage() {
               <ol>
                 {leaderboard.map((entry) => (
                   <li key={entry.id}>
-                    <span>{entry.label}</span>
+                    <span>{asText(entry.label, "Review")}</span>
                     <strong>{entry.score}/100</strong>
                   </li>
                 ))}

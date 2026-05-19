@@ -102,6 +102,17 @@
   font-weight: bold;
 }
 
+.auth-small-link {
+  align-self: flex-end;
+  color: #c4b5fd;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.auth-small-link:hover {
+  color: #ffffff;
+}
+
 .error-box {
   background: #ef4444;
   color: white;

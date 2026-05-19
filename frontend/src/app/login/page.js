@@ -17,15 +17,15 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (event) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     try {
       setLoading(true);
@@ -33,18 +33,10 @@ export default function Login() {
 
       const res = await loginUser(form);
 
-      // ✅ STORE TOKEN
       localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
 
-      // ✅ STORE USER
-      localStorage.setItem(
-        "user",
-        JSON.stringify(res.user)
-      );
-
-      // ✅ REDIRECT
       router.push("/dashboard");
-
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -57,19 +49,15 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <form
-        className="auth-form"
-        onSubmit={handleSubmit}
-      >
+      <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Login</h1>
 
-        {error && (
+        {error ? (
           <div className="error-box">
             {error}
           </div>
-        )}
+        ) : null}
 
-        {/* EMAIL */}
         <input
           type="email"
           name="email"
@@ -78,7 +66,6 @@ export default function Login() {
           onChange={handleChange}
         />
 
-        {/* PASSWORD */}
         <input
           type="password"
           name="password"
@@ -87,21 +74,18 @@ export default function Login() {
           onChange={handleChange}
         />
 
-        {/* FORGOT */}
-        {/* <Link href="/forgot-password">
+        <Link className="auth-small-link" href="/forgot-password">
           Forgot Password?
-        </Link> */}
+        </Link>
 
-        {/* BUTTON */}
-        <button type="submit">
+        <button type="submit" disabled={loading}>
           {loading
             ? "Logging in..."
             : "Login"}
         </button>
 
-        {/* REGISTER */}
-        <p>
-          No account?{" "}
+        <p className="auth-footer">
+          No account?
           <Link href="/register">
             Register
           </Link>

@@ -23,3 +23,16 @@ export const loginUser = async (data) => {
 
     return res.data;
   };
+
+export const requestPasswordReset =
+  async (email) => {
+    const res =
+      await api.post(
+        "/api/auth/forgot-password",
+        {
+          email,
+        }
+      );
+
+    return res.data;
+  };
