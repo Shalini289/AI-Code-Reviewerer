@@ -10,15 +10,29 @@ const clean = (value) =>
     : String(value).trim();
 
 const getEmailConfig = () => {
+  const service =
+    clean(process.env.EMAIL_SERVICE)
+      .toLowerCase();
+
   const apiKey =
     clean(process.env.RESEND_API_KEY);
 
-  const from =
-    clean(process.env.RESEND_FROM) ||
-    clean(process.env.MAIL_FROM);
+  const senderEmail =
+    clean(process.env.SENDER_EMAIL);
+
+  const senderName =
+    clean(process.env.SENDER_NAME) ||
+    "AI Code Reviewer";
+
+  const from = senderEmail
+    ? `${senderName} <${senderEmail}>`
+    : "";
 
   return {
+    service,
     apiKey,
+    senderEmail,
+    senderName,
     from,
   };
 };
@@ -27,7 +41,9 @@ const isEmailConfigured = () => {
   const config = getEmailConfig();
 
   return Boolean(
-    config.apiKey &&
+    config.service === "resend" &&
+      config.apiKey &&
+      config.senderEmail &&
       config.from
   );
 };
@@ -47,7 +63,7 @@ const sendEmail = async (mailOptions) => {
 
   if (!isEmailConfigured()) {
     throw new Error(
-      "Resend email is not configured. Add RESEND_API_KEY and RESEND_FROM in backend environment variables."
+      "Resend email is not configured. Add EMAIL_SERVICE=resend, RESEND_API_KEY, and SENDER_EMAIL in backend environment variables."
     );
   }
 

@@ -74,9 +74,9 @@ export default function Login() {
           onChange={handleChange}
         />
 
-        <Link className="auth-small-link" href="/forgot-password">
+        {/* <Link className="auth-small-link" href="/forgot-password">
           Forgot Password?
-        </Link>
+        </Link> */}
 
         <button type="submit" disabled={loading}>
           {loading

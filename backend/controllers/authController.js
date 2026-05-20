@@ -10,6 +10,34 @@ const {
 } =
   require("../utils/mailer");
 
+const getResetEmailErrorMessage = (err) => {
+  const message =
+    err.message ||
+    "";
+
+  if (
+    message.includes("domain is not verified") ||
+    message.includes("verify a domain")
+  ) {
+    return "Reset email could not be sent because the Resend sender domain is not verified. Verify your domain in Resend and set SENDER_EMAIL to an address on that domain.";
+  }
+
+  if (
+    message.includes("only send testing emails")
+  ) {
+    return "Reset email could not be sent because Resend test mode only allows sending to your own Resend account email. Verify a domain in Resend to send reset emails to users.";
+  }
+
+  if (
+    message.includes("API key") ||
+    message.includes("Unauthorized")
+  ) {
+    return "Reset email could not be sent because the Resend API key is invalid or missing in the deployed backend.";
+  }
+
+  return "Could not send reset email. Check EMAIL_SERVICE=resend, RESEND_API_KEY, SENDER_EMAIL, verified domain/sender, and deployed backend environment variables.";
+};
+
 exports.register = async (
   req,
   res
@@ -189,7 +217,7 @@ exports.forgotPassword =
       if (!isEmailConfigured()) {
         return res.status(500).json({
           message:
-            "Reset email is not configured. Add RESEND_API_KEY and RESEND_FROM in your deployed backend environment.",
+            "Reset email is not configured. Add EMAIL_SERVICE=resend, RESEND_API_KEY, and SENDER_EMAIL in your deployed backend environment.",
         });
       }
 
@@ -230,7 +258,7 @@ exports.forgotPassword =
 
       res.status(500).json({
         message:
-          "Could not send reset email. Check RESEND_API_KEY, RESEND_FROM, verified domain/sender, and deployed backend environment variables.",
+          getResetEmailErrorMessage(err),
       });
     }
   };
