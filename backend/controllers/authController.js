@@ -189,7 +189,7 @@ exports.forgotPassword =
       if (!isEmailConfigured()) {
         return res.status(500).json({
           message:
-            "Email service is not configured. Add Brevo SMTP variables in your deployed backend environment.",
+            "Reset email is not configured. Add RESEND_API_KEY and RESEND_FROM in your deployed backend environment.",
         });
       }
 
@@ -223,13 +223,14 @@ exports.forgotPassword =
       console.error(
         "Forgot password email failed:",
         err.message,
+        err.response?.data || "",
         err.code || "",
         err.response || ""
       );
 
       res.status(500).json({
         message:
-          "Could not send reset email. Check Brevo SMTP login, SMTP key, verified sender, and deployed backend environment variables.",
+          "Could not send reset email. Check RESEND_API_KEY, RESEND_FROM, verified domain/sender, and deployed backend environment variables.",
       });
     }
   };

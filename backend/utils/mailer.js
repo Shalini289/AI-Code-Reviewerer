@@ -1,64 +1,24 @@
-const nodemailer = require("nodemailer");
+const axios = require("axios");
 
-const firstDefined = (...values) =>
-  values.find(
-    (value) =>
-      value !== undefined &&
-      value !== null &&
-      String(value).trim() !== ""
-  );
+const RESEND_EMAIL_URL =
+  "https://api.resend.com/emails";
+
+const clean = (value) =>
+  value === undefined ||
+  value === null
+    ? ""
+    : String(value).trim();
 
 const getEmailConfig = () => {
-  const secureValue =
-    firstDefined(
-      process.env.SMTP_SECURE
-    ) || "false";
-
-  const host =
-    firstDefined(
-      process.env.SMTP_HOST
-    ) || "smtp-relay.brevo.com";
-
-  const port = Number(
-    firstDefined(
-      process.env.SMTP_PORT
-    ) || 587
-  );
-
-  const secure =
-    String(secureValue).toLowerCase() ===
-    "true";
-
-  const user =
-    firstDefined(
-
-      process.env.SMTP_USER,
-      process.env.BREVO_SMTP_LOGIN
-    );
-
-  const pass =
-    firstDefined(
-   
-      process.env.SMTP_PASS,
-      process.env.BREVO_SMTP_KEY
-    );
+  const apiKey =
+    clean(process.env.RESEND_API_KEY);
 
   const from =
-    firstDefined(
-  
-      process.env.SMTP_FROM,
-
-    ) ||
-    (user
-      ? `"AI Code Reviewer" <${user}>`
-      : undefined);
+    clean(process.env.RESEND_FROM) ||
+    clean(process.env.MAIL_FROM);
 
   return {
-    host,
-    port,
-    secure,
-    user,
-    pass,
+    apiKey,
     from,
   };
 };
@@ -67,59 +27,88 @@ const isEmailConfigured = () => {
   const config = getEmailConfig();
 
   return Boolean(
-    config.host &&
-      config.port &&
-      config.user &&
-      config.pass &&
+    config.apiKey &&
       config.from
   );
 };
 
-const createEmailTransporter = () => {
+const compactPayload = (payload) =>
+  Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== undefined &&
+        value !== null &&
+        value !== "";
+    })
+  );
+
+const sendEmail = async (mailOptions) => {
   const config = getEmailConfig();
 
   if (!isEmailConfigured()) {
     throw new Error(
-      "Email service is not configured. Add Brevo SMTP host, login, key, and verified sender."
+      "Resend email is not configured. Add RESEND_API_KEY and RESEND_FROM in backend environment variables."
     );
   }
 
-  return nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-  });
-};
+  const recipients = Array.isArray(mailOptions.to)
+    ? mailOptions.to.filter(Boolean)
+    : [mailOptions.to].filter(Boolean);
 
-const sendEmail = async (mailOptions) => {
-  const config = getEmailConfig();
-  const transporter = createEmailTransporter();
+  if (!recipients.length) {
+    throw new Error(
+      "Email recipient is missing."
+    );
+  }
+
+  const payload = compactPayload({
+    from: config.from,
+    to: recipients,
+    subject: mailOptions.subject,
+    html: mailOptions.html,
+    text: mailOptions.text,
+    reply_to:
+      mailOptions.replyTo ||
+      mailOptions.reply_to,
+  });
 
   console.log(
-    `[mailer] Sending email via ${config.host}:${config.port} secure=${config.secure} from=${config.from} to=${mailOptions.to} userConfigured=${Boolean(config.user)} passConfigured=${Boolean(config.pass)}`
+    `[mailer] Sending email with Resend from=${config.from} to=${recipients.join(", ")} apiKeyConfigured=${Boolean(config.apiKey)}`
   );
 
-  if (process.env.SMTP_SKIP_VERIFY !== "true") {
-    await transporter.verify();
+  try {
+    const response =
+      await axios.post(
+        RESEND_EMAIL_URL,
+        payload,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${config.apiKey}`,
+            "Content-Type":
+              "application/json",
+          },
+          timeout: 20000,
+        }
+      );
+
+    return {
+      messageId:
+        response.data?.id ||
+        response.data?.data?.id,
+      provider: "resend",
+      raw: response.data,
+    };
+  } catch (err) {
+    const resendMessage =
+      err.response?.data?.message ||
+      err.response?.data?.error ||
+      err.message;
+
+    throw new Error(
+      `Resend email failed: ${resendMessage}`
+    );
   }
-
-  const info = await transporter.sendMail({
-    from: config.from,
-    ...mailOptions,
-  });
-
-  if (info.rejected?.length) {
-    throw new Error(`Email rejected for ${info.rejected.join(", ")}`);
-  }
-
-  return info;
 };
 
 module.exports = {

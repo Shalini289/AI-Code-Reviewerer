@@ -32,7 +32,8 @@ try{
         await sendEmail({
           to:
             process.env.CONTACT_EMAIL ||
-            process.env.EMAIL_USER,
+            process.env.RESEND_CONTACT_EMAIL ||
+            process.env.RESEND_TO,
           replyTo: email,
           subject: "New Contact Message",
           text:
