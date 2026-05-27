@@ -15,7 +15,7 @@ export default function ContactPage() {
     type: "",
     message: "",
   });
-
+g
   const handleChange = (event) => {
     setForm({
       ...form,
